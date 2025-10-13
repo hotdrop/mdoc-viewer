@@ -39,20 +39,5 @@ LOCAL_DOCS_ROOT=./test_docs/
 1. 起動後に表示されるUIのURL（既定ではhttp://localhost:4000）を開きます。
 2. `Authentication`タブを表示します。
 3. テストユーザーを作成します。
-   1. `mytest@myproduct.test.jp` / sample1111
+   1. mytest@myproduct.test.jp / sample1111
    2. →環境変数の`ALLOWED_DOMAIN`で指定したドメインにします。
-
-## IDトークン取得
-エミュレータはREST API経由でサインインできます。上記で作成したユーザーのメールアドレスとパスワードを使い、次のようにIDトークンを取得してください。
-```sh
-curl -s -X POST \
-  'http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=test' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "email": "mytest@myproduct.test.jp",
-    "password": "your-password",
-    "returnSecureToken": true
-  }'
-```
-- `key=test`の値は`.env.local`で設定している`FIREBASE_WEB_API_KEY`と一致させてください。
-- レスポンスの`idToken`が`Bearer`トークンとして利用できます。jqなどで取り出すと扱いやすいです。

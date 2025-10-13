@@ -6,12 +6,12 @@ import { DEV_AUTH_COOKIE_NAME, isLocalRunMode } from "@/lib/auth/devSession";
 
 export const dynamic = "force-dynamic";
 
-export default function LocalLoginPage() {
+export default async function LocalLoginPage() {
   if (!isLocalRunMode()) {
     notFound();
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const tokenCookie = cookieStore.get(DEV_AUTH_COOKIE_NAME);
   const isLoggedIn = Boolean(tokenCookie?.value);
 

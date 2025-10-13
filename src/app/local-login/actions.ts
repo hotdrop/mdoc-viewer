@@ -8,10 +8,6 @@ export type LoginFormState = {
   error: string | null;
 };
 
-export const INITIAL_LOGIN_FORM_STATE: LoginFormState = {
-  error: null,
-};
-
 export async function loginAction(
   _prevState: LoginFormState,
   formData: FormData,
@@ -82,7 +78,7 @@ export async function loginAction(
     return { error: "ID トークンを取得できませんでした。" };
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.set({
     name: DEV_AUTH_COOKIE_NAME,
     value: idToken,
@@ -101,7 +97,7 @@ export async function logoutAction() {
     redirect("/");
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.delete(DEV_AUTH_COOKIE_NAME);
   redirect("/local-login");
 }
