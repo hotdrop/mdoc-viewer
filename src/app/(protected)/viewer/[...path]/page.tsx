@@ -8,15 +8,18 @@ import { TableOfContents } from "@/components/TableOfContents";
 
 export const dynamic = "force-dynamic";
 
+type ViewerPageParams = {
+  path?: string[];
+};
+
 type ViewerPageProps = {
-  params: {
-    path?: string[];
-  };
+  params: Promise<ViewerPageParams>;
 };
 
 export default async function ViewerPage({ params }: ViewerPageProps) {
   const config = loadAppConfig();
-  const pathSegments = params.path ?? [];
+  const resolvedParams = await params;
+  const pathSegments = resolvedParams?.path ?? [];
 
   try {
     const { document, rendered } = await fetchDocumentContent(

@@ -1,7 +1,7 @@
 # ローカル環境
 ローカル環境でアプリを実行するためのコマンドと手順を記載します。
 ```sh
-# エミュレータ起動
+# エミュレータ起動(登録したテストユーザーを永続化)
 firebase emulators:start --import=./firebase-data --export-on-exit
 
 # 開発実行
@@ -11,33 +11,15 @@ pnpm dev
 http://localhost:3000/local-login
 ```
 
-**上記コマンド**
-テストユーザーを永続化するためオプションをつけます。
-初回は`firebase-data`ディレクトリが存在しなくても構いません。終了時に作成され、次回起動時に読み込まれます。
+# テストユーザー
+mytest@myproduct.test.jp / sample1111
 
-## 初回のエミュレータセットアップ
-```sh
-# Firebaseログイン
-firebase login
-
-# プロジェクト直下でfirebase init → Emulatorsを選び、少なくともAuthenticationにチェック。Functions/Firestoreなど既存コードに合わせて選択。
-firebase init
-```
-
-環境変数に以下を設定する。クライアント側でFirebase Web SDKを使っていない構成なので、`NEXT_PUBLIC_...`のような環境変数は不要
+# 環境変数サンプル
 ```
 RUN_MODE=local
 ALLOWED_DOMAIN=myproduct.test.jp
-FIREBASE_PROJECT_ID=test
-FIREBASE_WEB_API_KEY=test
+FIREBASE_PROJECT_ID=demo-no-project
+FIREBASE_WEB_API_KEY=demo-no-project
 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 LOCAL_DOCS_ROOT=./test_docs/
 ```
-
-## エミュレータ起動
-本ドキュメントの冒頭に記載したコマンドでエミュレータを起動します。
-1. 起動後に表示されるUIのURL（既定ではhttp://localhost:4000）を開きます。
-2. `Authentication`タブを表示します。
-3. テストユーザーを作成します。
-   1. mytest@myproduct.test.jp / sample1111
-   2. →環境変数の`ALLOWED_DOMAIN`で指定したドメインにします。

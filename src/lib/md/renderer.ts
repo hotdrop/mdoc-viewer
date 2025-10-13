@@ -1,5 +1,12 @@
 import prism from "prismjs";
-import loadLanguages from "prismjs/components/index.js";
+import "prismjs/components/prism-clike";
+import "prismjs/components/prism-javascript";
+import "prismjs/components/prism-typescript";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-bash";
+import "prismjs/components/prism-shell-session";
+import "prismjs/components/prism-yaml";
+import "prismjs/components/prism-markdown";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
@@ -23,7 +30,17 @@ export type MarkdownRenderResult = {
   toc: TocItem[];
 };
 
-const SUPPORTED_LANGUAGES = new Set(["javascript", "typescript", "json", "bash", "shell", "yaml", "markdown"]);
+const SUPPORTED_LANGUAGES = new Set(["bash", "javascript", "typescript", "json", "yaml", "markdown"]);
+
+const LANGUAGE_ALIASES: Record<string, string> = {
+  shell: "bash",
+  sh: "bash",
+  js: "javascript",
+  jsx: "javascript",
+  ts: "typescript",
+  tsx: "typescript",
+  yml: "yaml",
+};
 
 type RenderOptions = {
   currentRelativePath: string;
@@ -102,10 +119,12 @@ function withPrismHighlight() {
     visitElements(tree, (node) => {
       if (node.tagName !== "code") return;
       const className = getClassName(node);
-      const language = extractLanguage(className);
+      const requestedLanguage = extractLanguage(className);
+      if (!requestedLanguage) return;
+
+      const language = ensurePrismLanguage(requestedLanguage);
       if (!language) return;
 
-      ensurePrismLanguage(language);
       const code = getTextContent(node);
       const grammar = prism.languages[language];
       if (!grammar) return;
@@ -169,14 +188,15 @@ function extractLanguage(classNames: string[]): string | null {
   return null;
 }
 
-function ensurePrismLanguage(language: string): void {
-  if (prism.languages[language]) {
-    return;
+function ensurePrismLanguage(language: string): string | null {
+  const normalized = normalizeLanguage(language);
+  if (!normalized) {
+    return null;
   }
-  if (!SUPPORTED_LANGUAGES.has(language)) {
-    return;
+  if (!prism.languages[normalized]) {
+    return null;
   }
-  loadLanguages([language]);
+  return normalized;
 }
 
 function getTextContent(node: Element): string {
@@ -224,4 +244,13 @@ function isElementNode(node: Node): node is Element {
 
 function isTextNode(node: Node): node is Text {
   return node.type === "text";
+}
+
+function normalizeLanguage(language: string): string | null {
+  const lower = language.toLowerCase();
+  const canonical = LANGUAGE_ALIASES[lower] ?? lower;
+  if (!SUPPORTED_LANGUAGES.has(canonical)) {
+    return null;
+  }
+  return canonical;
 }
