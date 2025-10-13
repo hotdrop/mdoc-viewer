@@ -39,7 +39,7 @@ pnpm start
 ## TODO
 - 手動確認
   - `pnpm dev` を実行後、以下を開き401/403 ガード・304 挙動・検索モード切替を確認。
-    - `/`
-    - `/viewer/...`
-    - `/search`
+    - `http://localhost:3000/`
+    - `http://localhost:3000/viewer/...`
+    - `http://localhost:3000/search`
 

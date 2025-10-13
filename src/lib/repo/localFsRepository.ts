@@ -124,3 +124,4 @@ export class LocalFsRepository implements DocumentRepository {
       }
     }
   }
+}

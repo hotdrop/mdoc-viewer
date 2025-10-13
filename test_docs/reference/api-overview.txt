@@ -1,0 +1,28 @@
+# API概要
+
+ここではRoute Handlerの責務と主なレスポンス構造をまとめます。サーバーサイドで認証とデータ取得を完結させ、クライアントは描画に専念する設計です。
+
+## エンドポイント一覧
+
+| Route | 説明 | 注意点 |
+| --- | --- | --- |
+| `/docs/[...path]` | ドキュメント本文を返す | `.txt`固定。`If-None-Match`と`If-Modified-Since`を解釈する |
+| `/viewer/[...path]` | SSRでMarkdownを整形 | 認証ガード必須。CSPを適用 |
+| `/search` | 検索結果を返す | エンベディングが閾値超過でサーバーフォールバック |
+
+## ヘッダー設定
+
+```text
+Cache-Control: private, max-age=60, stale-while-revalidate=120
+Vary: Authorization
+Content-Security-Policy: script-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'
+```
+
+## 検証フロー
+
+1. 未認証リクエストで`401`が返ることを確認。
+2. 認証済みで `/docs/index` を取得し、`Cache-Control` と `Vary` が付与されているか確認。
+3. `ETag` を保存し、再リクエストで `If-None-Match` を送信して `304` を確認。
+4. `/search` を閾値未満データと閾値超過データで呼び分け、サーバーフォールバックが動くことをチェック。
+
+> **Memo:** ログ出力には `uid` のみを使い、メールアドレスなど機微情報を出さないこと。

@@ -1,0 +1,32 @@
+# キャッシュ戦略
+
+ここではETagとLast-Modifiedに基づく条件付きGETのテストシナリオをまとめます。
+
+## 想定するレスポンス
+
+```json
+{
+  "uid": "test-user",
+  "path": "/docs/index",
+  "status": 200,
+  "mode": "viewer",
+  "route": "/docs/index"
+}
+```
+
+上記は構造化ログの一例です。失敗時は `reason` を追加し、機微情報は含めません。
+
+## テスト手順
+
+1. 最初のリクエストでレスポンスヘッダーに `ETag` と `Last-Modified` が含まれることを確認。
+2. 同じ`ETag`を使って `If-None-Match` を送信し、`304` が返るか確認。
+3. `If-None-Match` を削除して `If-Modified-Since` のみを送信し、変更がなければ `304` が返るか確認。
+4. `test_docs/` 内のファイルを更新し、`Last-Modified` が進んで `200` と新しい本文が返るか確認。
+
+## 補足
+
+- `Cache-Control` は `private, max-age=60, stale-while-revalidate=120`
+- ヘッダー設定の共通化は `src/server/headers/` 以下のヘルパーを利用
+- 返却された`ETag`はファイル内容のハッシュと一致することを想定
+
+> 他のテストケースは [`tests/cache`](../../tests/cache) ディレクトリを参照してください。
