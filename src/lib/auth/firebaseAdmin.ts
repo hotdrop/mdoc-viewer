@@ -17,14 +17,13 @@ function initializeFirebaseApp(config: AppConfig): App {
     return apps[0]!;
   }
 
+  if (config.firebaseAuthEmulatorHost) {
+    process.env.FIREBASE_AUTH_EMULATOR_HOST ??= config.firebaseAuthEmulatorHost;
+  }
+
   const app = initializeApp({
     projectId: config.firebaseProjectId,
   });
-
-  if (config.firebaseAuthEmulatorHost) {
-    const auth = getAuth(app);
-    auth.useEmulator(`http://${config.firebaseAuthEmulatorHost}`);
-  }
 
   return app;
 }
