@@ -5,24 +5,42 @@ import type { DocumentTreeNode } from "@/types/document";
 type DocumentNavigationProps = {
   tree: DocumentTreeNode[];
   currentPath: string;
+  title?: string;
+  className?: string;
+  showSearchLink?: boolean;
+  searchHref?: string;
 };
 
 export function DocumentNavigation({
   tree,
   currentPath,
+  title = "ドキュメント",
+  className = "",
+  showSearchLink = true,
+  searchHref = "/search",
 }: DocumentNavigationProps) {
+  const containerClass = [
+    "rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
   return (
-    <nav className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm">
+    <nav className={containerClass}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          ドキュメント
+          {title}
         </h2>
-        <Link
-          href="/search"
-          className="text-xs font-medium text-cyan-300 hover:text-cyan-200"
-        >
-          検索
-        </Link>
+        {showSearchLink ? (
+          <Link
+            href={searchHref}
+            className="text-xs font-medium text-cyan-300 hover:text-cyan-200"
+          >
+            検索
+          </Link>
+        ) : null}
       </div>
       <div className="space-y-2">
         {tree.length > 0 ? (

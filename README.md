@@ -44,18 +44,3 @@ pnpm lint
 # 型チェック
 pnpm exec tsc --noEmit
 ```
-
-
-## TODO
-### 表形式にならない
-ローカルで実行したところ`http://localhost:3000/viewer/guides/setup-local`というページで [setup-local.txt](test_docs/guides/setup-local.txt) にMarkdown形式で表を載せていますが、これがそのままの文字列で表示されてしまいました。
-
-### 左にナビゲーションメニューで以下を追加してほしい
-- ドキュメントの一覧（ツリー構造）
-- 検索リンク
-
-### トップ画面に以下の2つを表示してほしい
-- `schedules/`のschedules.md
-  - →ロードマップ的に表示したい
-- `schedules/`のrelease_note.md
-  - →四角いborderで囲ってプレビューしてほしい
