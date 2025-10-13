@@ -14,13 +14,14 @@ import SearchClient from "./search-client";
 export const dynamic = "force-dynamic";
 
 type SearchPageProps = {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
-  };
+  }>;
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const payload = await buildSearchPayload(searchParams.q ?? "");
+  const params = await searchParams;
+  const payload = await buildSearchPayload(params?.q ?? "");
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-10">
       <header className="space-y-2">

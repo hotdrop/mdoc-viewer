@@ -47,12 +47,9 @@ pnpm exec tsc --noEmit
 
 
 ## TODO
-### 手動確認
-`pnpm dev` を実行後、以下を開き401/403 ガード・304 挙動・検索モード切替を確認。
- - `http://localhost:3000/`
- - `http://localhost:3000/viewer/...`
- - `http://localhost:3000/search`
-### Firebaseのエミュレータ確認
-エミュレータ利用時に環境変数が正しく設定されているか確認するため、`FIREBASE_AUTH_EMULATOR_HOST`を指定した状態で`pnpm dev`を実行し、認証 API がエミュレータに向いていることを手動で確認してください。
+### 表形式にならない
+ローカルで実行したところ`http://localhost:3000/viewer/guides/setup-local`というページで [setup-local.txt](test_docs/guides/setup-local.txt) にMarkdown形式で表を載せていますが、これがそのままの文字列で表示されてしまいました。
 
-`pnpm dev`を実行してブラウザでアクセスしたところ以下のエラーになってしまいました。ローカル実行する場合はFirebaseのエミュレータが必要ですか？
+### 左にナビゲーションメニューで以下を追加してほしい
+- ドキュメントの一覧（ツリー構造）
+- 検索リンク
