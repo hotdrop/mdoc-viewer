@@ -53,3 +53,9 @@ pnpm exec tsc --noEmit
 ### 左にナビゲーションメニューで以下を追加してほしい
 - ドキュメントの一覧（ツリー構造）
 - 検索リンク
+
+### トップ画面に以下の2つを表示してほしい
+- `schedules/`のschedules.md
+  - →ロードマップ的に表示したい
+- `schedules/`のrelease_note.md
+  - →四角いborderで囲ってプレビューしてほしい
