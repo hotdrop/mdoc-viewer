@@ -14,7 +14,7 @@ export default async function ProtectedLayout({
 }: {
   children: ReactNode;
 }) {
-  const requestHeaders = headers();
+  const requestHeaders = await headers();
   const config = loadAppConfig();
   const authorizationHeader = requestHeaders.get("authorization") ?? "";
 
