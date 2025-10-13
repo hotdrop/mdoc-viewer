@@ -22,8 +22,10 @@ describe("renderMarkdown", () => {
     const result = await renderMarkdown(source, {
       currentRelativePath: "docs/index.txt",
     });
-    expect(result.html).toMatchInlineSnapshot(
-      `"<h1 id=\\"title\\"><a href=\\"#title\\" class=\\"heading-anchor\\">Title</a></h1>\n<ul>\n<li>list item</li>\n</ul>\n"`,
-    );
+    const expectedHtml = `<h1 id="title"><a href="#title" class="heading-anchor">Title</a></h1>
+<ul>
+<li>list item</li>
+</ul>`;
+    expect(result.html).toBe(expectedHtml);
   });
 });

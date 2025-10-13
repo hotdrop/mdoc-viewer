@@ -13,6 +13,7 @@ export function normalizeDocPath(raw?: string[] | string): NormalizedDocPath {
   const joined = Array.isArray(raw) ? raw.join("/") : raw ?? "";
   const trimmed = joined.trim();
   const normalized = path.posix.normalize(trimmed || ".");
+  const normalizedEndsWithSlash = normalized.endsWith("/");
 
   if (normalized === ".." || normalized.startsWith("../")) {
     throw new Error("許可されていないパスです。");
@@ -23,7 +24,16 @@ export function normalizeDocPath(raw?: string[] | string): NormalizedDocPath {
     sanitized = "";
   }
 
-  const isDirectory = sanitized === "" || sanitized.endsWith("/");
+  const sanitizedSegments = sanitized.split("/").filter(Boolean);
+  const lastSegment = sanitizedSegments.at(-1) ?? "";
+  const hasExtension = path.posix.extname(lastSegment) === EXTENSION;
+
+  const isDirectory =
+    sanitized === "" ||
+    normalizedEndsWithSlash ||
+    (Array.isArray(raw) && raw.length === 0) ||
+    (Array.isArray(raw) && raw.length === 1 && !hasExtension);
+
   let relativePath = sanitized;
 
   if (isDirectory) {

@@ -7,8 +7,7 @@ import rehypeStringify from "rehype-stringify";
 import rehypeSlug from "rehype-slug";
 import rehypeSanitize from "rehype-sanitize";
 import { fromHtml } from "hast-util-from-html";
-import { visit } from "unist-util-visit";
-import type { Root, Element } from "hast";
+import type { Root, Element, Node, Text, Parent } from "hast";
 import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import { loadSanitizePolicy } from "./sanitize";
 import { resolveRelativeDocPath } from "@/lib/path";
@@ -56,7 +55,7 @@ const remarkRehypeOptions: RemarkRehypeOptions = {
 
 function withHeadingAnchors(toc: TocItem[]) {
   return (tree: Root) => {
-    visit(tree, "element", (node: Element) => {
+    visitElements(tree, (node) => {
       if (!isHeading(node.tagName)) {
         return;
       }
@@ -92,7 +91,7 @@ function isHeading(tagName: Element["tagName"]): tagName is "h1" | "h2" | "h3" |
 
 function extractText(node: Element): string {
   let text = "";
-  visit(node, "text", (value: any) => {
+  visitTexts(node, (value) => {
     text += value.value ?? "";
   });
   return text;
@@ -100,7 +99,7 @@ function extractText(node: Element): string {
 
 function withPrismHighlight() {
   return (tree: Root) => {
-    visit(tree, "element", (node: Element) => {
+    visitElements(tree, (node) => {
       if (node.tagName !== "code") return;
       const className = getClassName(node);
       const language = extractLanguage(className);
@@ -120,7 +119,7 @@ function withPrismHighlight() {
 
 function withRelativeLinks(currentRelativePath: string) {
   return (tree: Root) => {
-    visit(tree, "element", (node: Element) => {
+    visitElements(tree, (node) => {
       if (node.tagName !== "a") return;
       const href = node.properties?.href;
       if (typeof href !== "string" || href.length === 0) {
@@ -182,8 +181,47 @@ function ensurePrismLanguage(language: string): void {
 
 function getTextContent(node: Element): string {
   let text = "";
-  visit(node, "text", (value: any) => {
+  visitTexts(node, (value) => {
     text += value.value ?? "";
   });
   return text;
+}
+
+type VisitHandlers = {
+  onElement?: (node: Element) => void;
+  onText?: (node: Text) => void;
+};
+
+function visitElements(node: Node, visitor: (node: Element) => void): void {
+  traverse(node, { onElement: visitor });
+}
+
+function visitTexts(node: Node, visitor: (node: Text) => void): void {
+  traverse(node, { onText: visitor });
+}
+
+function traverse(node: Node, handlers: VisitHandlers): void {
+  if (isElementNode(node)) {
+    handlers.onElement?.(node);
+  }
+  if (isTextNode(node)) {
+    handlers.onText?.(node);
+  }
+  if (isParentNode(node)) {
+    for (const child of node.children) {
+      traverse(child, handlers);
+    }
+  }
+}
+
+function isParentNode(node: Node): node is Parent {
+  return "children" in node && Array.isArray((node as Parent).children);
+}
+
+function isElementNode(node: Node): node is Element {
+  return node.type === "element";
+}
+
+function isTextNode(node: Node): node is Text {
+  return node.type === "text";
 }
