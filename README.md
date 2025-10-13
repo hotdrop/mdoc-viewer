@@ -2,7 +2,6 @@
 このアプリはドキュメントビューワです。
 
 ## セットアップ
-
 1. 依存関係をインストールします。
 ```bash
 pnpm install
@@ -19,22 +18,33 @@ pnpm install
 | `LOCAL_DOCS_ROOT` | Local モードのドキュメントディレクトリ |
 | `GCP_PROJECT_ID`, `GCS_BUCKET` | Cloud モードで使用 |
 
-## 開発サーバの起動
-```bash
-pnpm dev
-```
-
-## テスト
-単体テストおよびスナップショットテストを実行します。
-```bash
-pnpm test
-```
 
 ## ビルド
 ```bash
 pnpm build
 pnpm start
 ```
+
+## 開発サーバー起動
+```bash
+pnpm dev
+```
+ローカルのエミュレータ実行方法は`README_FirebaseEmulator.md`を参照のこと。
+
+## テスト
+単体テストおよびスナップショットテストを実行します。
+
+```bash
+# ユニットテスト
+pnpm test
+
+# lint
+pnpm lint
+
+# 型チェック
+pnpm exec tsc --noEmit
+```
+
 
 ## TODO
 ### 手動確認
@@ -44,3 +54,5 @@ pnpm start
  - `http://localhost:3000/search`
 ### Firebaseのエミュレータ確認
 エミュレータ利用時に環境変数が正しく設定されているか確認するため、`FIREBASE_AUTH_EMULATOR_HOST`を指定した状態で`pnpm dev`を実行し、認証 API がエミュレータに向いていることを手動で確認してください。
+
+`pnpm dev`を実行してブラウザでアクセスしたところ以下のエラーになってしまいました。ローカル実行する場合はFirebaseのエミュレータが必要ですか？

@@ -1,11 +1,25 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import {
+  DEV_AUTH_COOKIE_NAME,
+  isLocalRunMode,
+} from "@/lib/auth/devSession";
 import { DEFAULT_CSP } from "@/server/headers/common";
 
 export function middleware(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+
+  if (isLocalRunMode() && !requestHeaders.has("authorization")) {
+    const tokenCookie = request.cookies.get(DEV_AUTH_COOKIE_NAME);
+    const token = tokenCookie?.value?.trim();
+    if (token) {
+      requestHeaders.set("authorization", `Bearer ${token}`);
+    }
+  }
+
   const response = NextResponse.next({
     request: {
-      headers: request.headers,
+      headers: requestHeaders,
     },
   });
 
