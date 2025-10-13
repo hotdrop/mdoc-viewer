@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import Fuse from "fuse.js";
+import type { IFuseOptions } from "fuse.js";
 import { requireAuthenticatedContext } from "@/lib/auth";
 import { listIndexableDocuments } from "@/lib/documents/service";
 import { serializeIndexableDocuments, type SearchDocument } from "@/types/search";
 import { SEARCH_SERVER_TTL_SECONDS } from "@/lib/constants";
 import { logAccess } from "@/lib/logger";
 
-const fuseOptions: Fuse.IFuseOptions<SearchDocument> = {
+const fuseOptions: IFuseOptions<SearchDocument> = {
   includeScore: true,
   threshold: 0.3,
   ignoreLocation: true,

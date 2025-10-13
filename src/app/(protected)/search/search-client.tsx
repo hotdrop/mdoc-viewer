@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Fuse from "fuse.js";
+import type { IFuseOptions } from "fuse.js";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_components/AuthProvider";
 import type { SearchDocument, SearchPagePayload } from "@/types/search";
 import { formatDateTime } from "@/lib/datetime/format";
 
-const fuseOptions: Fuse.IFuseOptions<SearchDocument> = {
+const fuseOptions: IFuseOptions<SearchDocument> = {
   includeScore: true,
   threshold: 0.3,
   ignoreLocation: true,
