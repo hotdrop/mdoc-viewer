@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { loadAppConfig } from "@/lib/config";
-import { fetchDocumentContent } from "@/lib/documents/service";
+import {
+  fetchDocumentContent,
+  listDocumentTree,
+} from "@/lib/documents/service";
 import { formatDateTime } from "@/lib/datetime/format";
 import { MarkdownArticle } from "@/components/MarkdownArticle";
 import { TableOfContents } from "@/components/TableOfContents";
+import { DocumentNavigation } from "../_components/DocumentNavigation";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +26,11 @@ export default async function ViewerPage({ params }: ViewerPageProps) {
   const pathSegments = resolvedParams?.path ?? [];
 
   try {
-    const { document, rendered } = await fetchDocumentContent(
-      config,
-      pathSegments,
-    );
+    const [content, documentTree] = await Promise.all([
+      fetchDocumentContent(config, pathSegments),
+      listDocumentTree(config),
+    ]);
+    const { document, rendered } = content;
 
     const title = document.frontmatter.title ?? buildTitle(pathSegments);
     const breadcrumbs = buildBreadcrumbs(document.relativePath);
@@ -56,12 +61,22 @@ export default async function ViewerPage({ params }: ViewerPageProps) {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <MarkdownArticle
-            className="markdown-body"
-            html={rendered.html}
-          />
-          <TableOfContents toc={rendered.toc} />
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <aside className="lg:w-64 lg:flex-shrink-0">
+            <DocumentNavigation
+              tree={documentTree}
+              currentPath={document.viewerPath}
+            />
+          </aside>
+          <section className="flex-1">
+            <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_260px]">
+              <MarkdownArticle
+                className="markdown-body"
+                html={rendered.html}
+              />
+              <TableOfContents toc={rendered.toc} />
+            </div>
+          </section>
         </div>
       </main>
     );

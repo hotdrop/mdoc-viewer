@@ -29,3 +29,10 @@ export type IndexableDocument = {
   excerpt: string;
   headings: string[];
 };
+
+export type DocumentTreeNode = {
+  label: string;
+  path: string;
+  href?: string;
+  children: DocumentTreeNode[];
+};

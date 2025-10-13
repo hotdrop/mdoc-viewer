@@ -10,6 +10,7 @@ import "prismjs/components/prism-markdown";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
+import remarkGfm from "remark-gfm";
 import rehypeStringify from "rehype-stringify";
 import rehypeSlug from "rehype-slug";
 import rehypeSanitize from "rehype-sanitize";
@@ -51,6 +52,7 @@ export async function renderMarkdown(markdown: string, options: RenderOptions): 
   const sanitizePolicy = await loadSanitizePolicy();
   const processor = unified()
     .use(remarkParse)
+    .use(remarkGfm)
     .use(remarkRehype, remarkRehypeOptions)
     .use(rehypeSlug)
     .use(withHeadingAnchors, toc)
