@@ -5,15 +5,16 @@ import { createDocumentRepository } from "@/lib/repo";
 import { applyCacheHeaders, shouldReturnNotModified } from "@/lib/cache/headers";
 import { logAccess } from "@/lib/logger";
 
-type RouteParams = {
-  params: {
+type RouteContext = {
+  params: Promise<{
     path?: string[];
-  };
+  }>;
 };
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, context: RouteContext) {
   const { config, user } = await requireAuthenticatedContext(request);
-  const docPath = normalizeDocPath(params.path ?? []);
+  const { path } = await context.params;
+  const docPath = normalizeDocPath(path ?? []);
   const repository = createDocumentRepository(config);
 
   const responseHeaders = new Headers();

@@ -22,7 +22,7 @@ function deepMergePolicy(
     ...extra,
     tagNames: mergeArray(base.tagNames, extra.tagNames),
     attributes: {
-      ...base.attributes,
+      ...(base.attributes ?? {}),
       ...Object.fromEntries(
         Object.entries(extra.attributes ?? {}).map(([key, value]) => [
           key,
@@ -31,7 +31,7 @@ function deepMergePolicy(
       ),
     },
     protocols: {
-      ...base.protocols,
+      ...(base.protocols ?? {}),
       ...Object.fromEntries(
         Object.entries(extra.protocols ?? {}).map(([key, value]) => [
           key,
@@ -42,10 +42,6 @@ function deepMergePolicy(
   };
 }
 
-function mergeArray<T>(base?: T[] | null, extra?: T[] | null): T[] | undefined {
-  if (!base && !extra) {
-    return undefined;
-  }
-  const merged = new Set<T>([...(base ?? []), ...(extra ?? [])]);
-  return Array.from(merged);
+function mergeArray<T>(base?: T[] | null, extra?: T[] | null): T[] {
+  return Array.from(new Set<T>([...(base ?? []), ...(extra ?? [])]));
 }

@@ -27,12 +27,14 @@ export class GcsRepository implements DocumentRepository {
       throw new Error("ドキュメントが存在しません。");
     }
 
-    const [[content], metadata] = await Promise.all([
+    const [[content], [metadata]] = await Promise.all([
       file.download(),
       file.getMetadata(),
     ]);
     const parsed = parseMarkdown(content.toString("utf8"));
-    const etag = metadata.etag ?? metadata.generation ?? "";
+    const etag =
+      metadata.etag ??
+      (metadata.generation !== undefined ? String(metadata.generation) : "");
     const updatedAt = metadata.updated
       ? new Date(metadata.updated)
       : new Date();

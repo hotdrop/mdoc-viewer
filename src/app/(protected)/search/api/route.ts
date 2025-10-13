@@ -18,11 +18,11 @@ const fuseOptions: IFuseOptions<SearchDocument> = {
   ],
 };
 
-type RouteParams = {
-  params: Record<string, never>;
+type RouteContext = {
+  params: Promise<Record<string, never>>;
 };
 
-export async function GET(request: NextRequest, _params: RouteParams) {
+export async function GET(request: NextRequest, _context: RouteContext) {
   const { config, user } = await requireAuthenticatedContext(request);
   const query = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   const responseHeaders = new Headers();
