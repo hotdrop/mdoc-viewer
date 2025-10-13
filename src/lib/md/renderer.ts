@@ -1,0 +1,189 @@
+import prism from "prismjs";
+import loadLanguages from "prismjs/components/index.js";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import rehypeStringify from "rehype-stringify";
+import rehypeSlug from "rehype-slug";
+import rehypeSanitize from "rehype-sanitize";
+import { fromHtml } from "hast-util-from-html";
+import { visit } from "unist-util-visit";
+import type { Root, Element } from "hast";
+import type { Options as RemarkRehypeOptions } from "remark-rehype";
+import { loadSanitizePolicy } from "./sanitize";
+import { resolveRelativeDocPath } from "@/lib/path";
+
+export type TocItem = {
+  id: string;
+  title: string;
+  depth: number;
+};
+
+export type MarkdownRenderResult = {
+  html: string;
+  toc: TocItem[];
+};
+
+const SUPPORTED_LANGUAGES = new Set(["javascript", "typescript", "json", "bash", "shell", "yaml", "markdown"]);
+
+type RenderOptions = {
+  currentRelativePath: string;
+};
+
+export async function renderMarkdown(markdown: string, options: RenderOptions): Promise<MarkdownRenderResult> {
+  const toc: TocItem[] = [];
+  const sanitizePolicy = await loadSanitizePolicy();
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkRehype, remarkRehypeOptions)
+    .use(rehypeSlug)
+    .use(withHeadingAnchors, toc)
+    .use(withRelativeLinks, options.currentRelativePath)
+    .use(withPrismHighlight)
+    .use(rehypeSanitize, sanitizePolicy)
+    .use(rehypeStringify, { allowDangerousHtml: false });
+
+  const file = await processor.process(markdown);
+  return {
+    html: String(file),
+    toc,
+  };
+}
+
+const remarkRehypeOptions: RemarkRehypeOptions = {
+  allowDangerousHtml: false,
+};
+
+function withHeadingAnchors(toc: TocItem[]) {
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element) => {
+      if (!isHeading(node.tagName)) {
+        return;
+      }
+      if (typeof node.properties?.id !== "string") {
+        return;
+      }
+      const id = node.properties.id;
+      const textContent = extractText(node).trim();
+      if (!textContent) {
+        return;
+      }
+      const depth = parseInt(node.tagName.slice(1), 10);
+      toc.push({ id, title: textContent, depth });
+
+      node.children = [
+        {
+          type: "element",
+          tagName: "a",
+          properties: {
+            href: `#${id}`,
+            className: ["heading-anchor"],
+          },
+          children: node.children,
+        },
+      ];
+    });
+  };
+}
+
+function isHeading(tagName: Element["tagName"]): tagName is "h1" | "h2" | "h3" | "h4" | "h5" | "h6" {
+  return /^h[1-6]$/.test(tagName);
+}
+
+function extractText(node: Element): string {
+  let text = "";
+  visit(node, "text", (value: any) => {
+    text += value.value ?? "";
+  });
+  return text;
+}
+
+function withPrismHighlight() {
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element) => {
+      if (node.tagName !== "code") return;
+      const className = getClassName(node);
+      const language = extractLanguage(className);
+      if (!language) return;
+
+      ensurePrismLanguage(language);
+      const code = getTextContent(node);
+      const grammar = prism.languages[language];
+      if (!grammar) return;
+
+      const highlighted = prism.highlight(code, grammar, language);
+      const fragment = fromHtml(highlighted, { fragment: true });
+      node.children = fragment.children as Element[];
+    });
+  };
+}
+
+function withRelativeLinks(currentRelativePath: string) {
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element) => {
+      if (node.tagName !== "a") return;
+      const href = node.properties?.href;
+      if (typeof href !== "string" || href.length === 0) {
+        return;
+      }
+      if (href.startsWith("#")) {
+        return;
+      }
+      if (/^[a-zA-Z][a-zA-Z+.-]*:/.test(href)) {
+        return;
+      }
+
+      try {
+        const normalized = resolveRelativeDocPath(currentRelativePath, href);
+        node.properties = {
+          ...(node.properties ?? {}),
+          href: normalized.viewerPath,
+        };
+      } catch {
+        node.tagName = "span";
+        if (node.properties) {
+          delete node.properties.href;
+        }
+      }
+    });
+  };
+}
+
+function getClassName(node: Element): string[] {
+  const properties = node.properties ?? {};
+  const className = properties.className;
+  if (Array.isArray(className)) {
+    return className.map(String);
+  }
+  if (typeof className === "string") {
+    return className.split(/\s+/);
+  }
+  return [];
+}
+
+function extractLanguage(classNames: string[]): string | null {
+  for (const name of classNames) {
+    if (name.startsWith("language-")) {
+      return name.slice("language-".length).toLowerCase();
+    }
+  }
+  return null;
+}
+
+function ensurePrismLanguage(language: string): void {
+  if (prism.languages[language]) {
+    return;
+  }
+  if (!SUPPORTED_LANGUAGES.has(language)) {
+    return;
+  }
+  loadLanguages([language]);
+}
+
+function getTextContent(node: Element): string {
+  let text = "";
+  visit(node, "text", (value: any) => {
+    text += value.value ?? "";
+  });
+  return text;
+}
