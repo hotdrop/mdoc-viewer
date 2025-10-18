@@ -8,6 +8,7 @@ pnpm install
 ```
 
 2. 必要な環境変数を設定してください（例: `.env.local`）。
+
 | 変数名 | 説明 |
 | --- | --- |
 | `RUN_MODE` | `local` または `cloud` |
