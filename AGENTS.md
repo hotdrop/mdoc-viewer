@@ -1,87 +1,87 @@
 # Guidelines
 
-## Top Priority Rule
-The top priority rules listed here always take precedence over all other rules and decisions and must never be broken under any circumstances.
+## Top Priority Rules
 
-- When a user asks a question, compares ideas, or discusses a policy, the system first responds with an explanation, suggestion, or recommendation, and does not begin pasting code or modifying files until it receives explicit implementation instructions from the user.
-- Implementation and file changes will only be carried out if there is clear agreement from the user, such as "Please implement it according to this policy." Until agreement is reached, confirmation questions will be asked as necessary, and the user's intentions and wishes will be given top priority and respected.
+These rules always take precedence over lower-level project guidance.
 
-## Overall Rules
-- Please answer in Japanese.
-- Please provide a detailed explanation in Japanese.
-- Please provide all the implementation code without omissions.
-- Please clearly explain the justification and reason for the change, and the intention of the implementation.
-- Please adhere to the basic principles of software development, such as the DRY principle, YAGNI, and SOLID principle. However, it is okay to prioritize the conventions of Android, and Kotlin over the principles.
+- 回答は日本語で行う。
+- ユーザーが質問、比較、方針相談をしている段階では、まず説明・提案・確認を行い、明示的な実装指示があるまでファイル変更を開始しない。
+- 実装やファイル変更は、ユーザーから「実装して」「この方針で進めて」などの明確な合意がある場合のみ行う。
+- ユーザーの意図と希望を最優先し、不明点が実装判断に影響する場合は確認する。
 
-## Context1. 技術スタックと禁止事項
-* Node.js LTS 20/22, Next.js App Router, webpack
-* パッケージマネージャは`pnpm`
-* 禁止: Turbopack, Bun, 本番Edge Runtime, 外部検索基盤や別マークダウンレンダラの追加、サードパーティCDN/署名URL導入
-* サーバ優先: 認証・権限・データ取得は必ずサーバ側で評価。クライアントは描画のみ
+## Project Source of Truth
 
-## 2. ディレクトリ規約（目安）
-```
+- 詳細仕様の一次情報は `docs/specification.md` とする。
+- エージェント向け反復手順は `.codex/skills/md-doc-viewer/SKILL.md` を参照する。
+- sanitize の許可方針は `sanitize/policy.ts` を基準にし、追加許可は `sanitize/policy.extra.ts` で行う。
+- `AGENTS.md` は恒久ルールと作業前チェックに絞り、詳細仕様を重複管理しない。
+
+## Technical Constraints
+
+- Runtime: Node.js LTS 20/22.
+- Framework: Next.js App Router with TypeScript and webpack.
+- Package manager: `pnpm`.
+- 禁止: Turbopack, Bun, production Edge Runtime, 外部検索基盤、別Markdownレンダラ、サードパーティCDN、署名URL導入。
+- 認証・権限・データ取得はサーバ側で評価する。クライアントは描画と操作に集中させる。
+- 追加可能な依存は `remark`/`rehype`/`rehype-sanitize`, `prismjs`, `fuse.js`, `@google-cloud/storage`, `firebase`/`firebase-admin` を基本とする。
+- 方針外のライブラリ追加は明示承認を取る。容易なユーティリティは自前実装を優先する。
+
+## Architecture Guide
+
+```text
 src/
-  app/                 # App Router
-    (routes...)        # /, /viewer/[...path], /docs/[...path], /search
+  app/                 # App Router routes
   lib/
-    auth/              # トークン検証・ドメイン判定
-    repo/              # DocumentRepository( LocalFs / Gcs )
-    md/                # remark/rehypeパイプライン・sanitize
-    cache/             # ETag/Last-Modified/TTLヘルパ
-    path/              # 正規化・ルート外拒否ユーティリティ
-  server/headers/      # 共通レスポンスヘッダ(CSP, Vary等)
-  types/               # 共有型（/docsレスポンス等）
+    auth/              # token verification and domain checks
+    repo/              # DocumentRepository, LocalFs, GCS
+    md/                # remark/rehype pipeline and sanitize
+    cache/             # ETag, Last-Modified, TTL helpers
+    path/              # path normalization and root escape prevention
+  server/headers/      # common response headers
+  types/               # shared response/domain types
 sanitize/
-  policy.ts            # ベースポリシー
-  policy.extra.ts      # 追加許可（存在すればマージ）
+  policy.ts            # base sanitize policy
+  policy.extra.ts      # optional extension policy
 ```
 
-## 3. 依存ポリシー
-* 追加可能: `remark`/`rehype`/`rehype-sanitize`、`prismjs`（サーバサイド使用）、`fuse.js`、`@google-cloud/storage`、`firebase`/`firebase-admin`。
-* それ以外のライブラリ追加はPRで明示承認が必要。代替実装が容易なユーティリティは自前実装を優先。
+既存の配置・命名・抽象境界を優先し、不要な新規抽象や仕様外ルートを追加しない。
 
-## 4. セキュリティ実装ルール
-* 認証搬送: `Authorization: Bearer <ID token>`。全Route Handlerで検証+LayoutでSSRガード。`Vary: Authorization` を必ず付与。
-* CSP: `script-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'` を共通レスポンスヘッダで適用。
-* サニタイズ: `rehype-sanitize` のベースポリシー固定+ `policy.extra.ts` で任意拡張（存在すればマージ）。`img`は不許可。
-* パス防御: 受け取ったパス/相対リンクは正規化→ルート外拒否を共通関数で行い、`.txt`固定・`index.txt`優先を強制。
-* 情報漏洩防止: エラーメッセージ・ログに環境変数やバケット名を出さない。ユーザ識別はuidで行う（emailはログ出力禁止）。
+## Security Invariants
 
-## 5. キャッシュ/ヘッダ規約
-* 条件付きGET: `ETag` + `Last-Modified` を両建てし、`If-None-Match` 優先で304を返す。
-* Cache-Control: `private, max-age=60, stale-while-revalidate=120` を既定。
-* これらはヘルパにまとめ、全エンドポイントで統一適用。
+- 認証搬送は `Authorization: Bearer <ID token>` を使う。
+- 全 Route Handler で認証を検証し、保護ページは Layout でSSRガードする。
+- 認証依存レスポンスには `Vary: Authorization` を付与する。
+- 共通CSPは `script-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'` を維持する。
+- Markdown HTML は `rehype-sanitize` を通し、sanitize なしの `dangerouslySetInnerHTML` を禁止する。
+- `img` は許可しない。
+- 受け取ったパスと相対リンクは共通関数で正規化し、ルート外参照を拒否する。文書拡張子は `.txt` 固定、ディレクトリは `index.txt` 優先とする。
+- エラー本文・ログに環境変数、バケット名、email、トークンなどの機微情報を出さない。ユーザー識別は `uid` を使う。
 
-## 6. 検索のフェイルオーバー運用
-* 埋め込みメタデータが 800件超 or 2.5MB超 で自動的にサーバ検索へ切替（30s TTL）。
-* 切替はUI透過（クエリUXは不変）。実装はRoute Handler内に閉じる。
+## Cache and Headers
 
-## 7. ログ/可観測性
-* 構造化ログ: `{ uid, path, status, mode, route }`。失敗時は `reason` を付与（機微情報は含めない）。
-* Cloud Runでは標準出力ログのみを使用。独自外部転送はしない。
+- 条件付きGETは `ETag` と `Last-Modified` を併用する。
+- `If-None-Match` を優先して `304` を返す。
+- 既定の `Cache-Control` は `private, max-age=60, stale-while-revalidate=120` とする。
+- ヘッダ処理は共通ヘルパに集約し、エンドポイントごとの差分を作らない。
 
-## 8. テスト最小セット
-* ユニット: パス正規化・ルート外拒否、ETag/304分岐、サニタイズ禁止ケース（`javascript:`等）。
-* スナップショット: XSSフィクスチャ複数（許可/拒否）。
-* E2E（スモーク）: 未認証→401、許可ドメイン→200、`/viewer`でMarkdownが整形表示、検索が閾値未満でクライアント/閾値超過でサーバ検索へ切替。
+## Search and Logging
 
-## 9. デプロイ/実行
-* ランタイムは Node.js 20/22 固定。`next build && next start`。
-* Dockerは最小レイヤ・`.dockerignore`最適化（`node_modules`/`.next/cache`除外）。
-* 環境変数はサーバ専用（WEB_API_KEYのみクライアント可）。ビルド時のインライン化禁止。
+- 検索メタデータが 800件超、または 2.5MB超の場合はサーバ検索へ切り替える。
+- 検索切り替えはUI透過とし、クエリUXを変えない。
+- 構造化ログは `{ uid, path, status, mode, route }` を基本とし、失敗時のみ安全な `reason` を付ける。
+- Cloud Run では標準出力ログを使い、独自外部転送は追加しない。
 
-## 10. アンチパターン（禁止）
-* サニタイズを通さない `dangerouslySetInnerHTML`。
-* クライアントからのGCS直叩き・直リンク露出。
-* Turbopack/Bun/Edge Runtime（本番）。
-* 仕様外のルート・フラグ・ヘッダ追加。
-* 「便利そうだから」との理由による外部サービス導入。
+## Work Checklist
 
-## 11. Doneの定義
-* 仕様の該当章を満たす実装+テスト（上記最小セット）+手動動作確認（`/`, `/viewer`, `/search`）。
-* 304挙動/認証ガード/CSP/XSSフィクスチャが通ること。
-* PRに検証手順と結果を記載し、レビューで再現可能。
+- 作業前に `docs/specification.md` と関連実装を確認する。
+- セキュリティ、Markdown、検索、Route Handler、リポジトリ層、テスト追加に関わる作業では `.codex/skills/md-doc-viewer/SKILL.md` を参照する。
+- 変更は DRY, YAGNI, SOLID を意識しつつ、Next.js と TypeScript の既存慣習を優先する。
+- 既存のユーザー変更を巻き戻さない。
 
-# Lastly
-After reading these rules, please display [READ AGENTS RULES]
+## Definition of Done
+
+- 仕様の該当章を満たす実装とテストがある。
+- 最小テスト対象: パス正規化・ルート外拒否、ETag/304分岐、sanitize禁止ケース、検索切り替え。
+- 手動確認対象: `/`, `/viewer`, `/search`。
+- 304挙動、認証ガード、CSP、XSSフィクスチャが確認されている。
+- PRや完了報告には検証手順と結果を記載し、レビューで再現可能にする。
