@@ -1,25 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Fuse from "fuse.js";
-import type { IFuseOptions } from "fuse.js";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_components/AuthProvider";
-import type { SearchDocument, SearchPagePayload } from "@/types/search";
+import {
+  createSearchIndex,
+  mapFuseResults,
+} from "@/lib/search/searchDocuments";
+import type {
+  SearchMatchedField,
+  SearchPagePayload,
+  SearchResultItem,
+} from "@/types/search";
 import { formatDateTime } from "@/lib/datetime/format";
-
-const fuseOptions: IFuseOptions<SearchDocument> = {
-  includeScore: true,
-  threshold: 0.3,
-  ignoreLocation: true,
-  keys: [
-    { name: "title", weight: 0.6 },
-    { name: "headings", weight: 0.3 },
-    { name: "excerpt", weight: 0.1 },
-  ],
-};
-
-type SearchResult = SearchDocument & { score: number };
 
 type SearchClientProps = {
   payload: SearchPagePayload;
@@ -29,13 +22,13 @@ export default function SearchClient({ payload }: SearchClientProps) {
   const auth = useAuth();
   const router = useRouter();
   const [query, setQuery] = useState(payload.initialQuery);
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<SearchResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const mode = payload.mode;
 
-  const fuse = useMemo(() => {
+  const searchIndex = useMemo(() => {
     if (mode !== "client") return null;
-    return new Fuse(payload.documents, fuseOptions);
+    return createSearchIndex(payload.documents);
   }, [mode, payload.documents]);
 
   useEffect(() => {
@@ -49,17 +42,11 @@ export default function SearchClient({ payload }: SearchClientProps) {
       return;
     }
     if (mode === "client") {
-      if (!fuse) {
+      if (!searchIndex) {
         setResults([]);
         return;
       }
-      const hits = fuse.search(query).slice(0, 20);
-      setResults(
-        hits.map((hit) => ({
-          ...hit.item,
-          score: hit.score ?? 0,
-        })),
-      );
+      setResults(mapFuseResults(searchIndex.search(query).slice(0, 20)));
     } else {
       const controller = new AbortController();
       const doFetch = async () => {
@@ -73,8 +60,8 @@ export default function SearchClient({ payload }: SearchClientProps) {
           if (!response.ok) {
             throw new Error("検索API呼び出しに失敗しました。");
           }
-          const data = (await response.json()) as { results: SearchDocument[] };
-          setResults(data.results.map((doc) => ({ ...doc, score: 0 })));
+          const data = (await response.json()) as { results: SearchResultItem[] };
+          setResults(data.results);
         } catch (error) {
           if ((error as Error).name !== "AbortError") {
             console.error(error);
@@ -86,7 +73,7 @@ export default function SearchClient({ payload }: SearchClientProps) {
       void doFetch();
       return () => controller.abort();
     }
-  }, [auth.bearerToken, fuse, mode, query]);
+  }, [auth.bearerToken, mode, query, searchIndex]);
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -105,8 +92,8 @@ export default function SearchClient({ payload }: SearchClientProps) {
           value={query}
           onChange={handleInput}
         />
-        <span className="text-xs text-slate-500">
-          モード: {mode === "client" ? "クライアント検索" : "サーバ検索"}
+        <span className="shrink-0 text-xs text-slate-500">
+          {mode === "client" ? "高速検索" : "大規模検索"}
         </span>
       </div>
 
@@ -127,18 +114,30 @@ export default function SearchClient({ payload }: SearchClientProps) {
             className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
           >
             <a
-              href={result.viewerPath}
-              className="space-y-2 text-slate-100 hover:text-cyan-300"
+              href={result.targetHref}
+              className="block space-y-2 text-slate-100 hover:text-cyan-300"
             >
-              <h2 className="text-lg font-semibold">{result.title}</h2>
-              <p className="text-sm text-slate-400">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold">{result.title}</h2>
+                <span className="w-fit rounded border border-cyan-900/50 px-2 py-1 text-xs text-cyan-200">
+                  {formatMatchedField(result.matchedField)}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
                 最終更新: {formatDateTime(new Date(result.updatedAt))}
               </p>
-              <p className="text-sm text-slate-300">{result.excerpt}</p>
+              <p className="text-sm leading-6 text-slate-300">{result.snippet}</p>
             </a>
           </li>
         ))}
       </ul>
     </section>
   );
+}
+
+function formatMatchedField(field: SearchMatchedField): string {
+  if (field === "title") return "タイトル一致";
+  if (field === "heading") return "見出し一致";
+  if (field === "body") return "本文一致";
+  return "抜粋一致";
 }

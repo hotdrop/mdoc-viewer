@@ -1,28 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Fuse from "fuse.js";
-import type { IFuseOptions } from "fuse.js";
 import { requireAuthenticatedContext } from "@/lib/auth";
 import { listIndexableDocuments } from "@/lib/documents/service";
-import { serializeIndexableDocuments, type SearchDocument } from "@/types/search";
+import { searchDocuments } from "@/lib/search/searchDocuments";
+import { serializeIndexableDocuments } from "@/types/search";
 import { SEARCH_SERVER_TTL_SECONDS } from "@/lib/constants";
 import { logAccess } from "@/lib/logger";
+import { applyCommonSecurityHeaders } from "@/server/headers/common";
 
-const fuseOptions: IFuseOptions<SearchDocument> = {
-  includeScore: true,
-  threshold: 0.3,
-  ignoreLocation: true,
-  keys: [
-    { name: "title", weight: 0.6 },
-    { name: "headings", weight: 0.3 },
-    { name: "excerpt", weight: 0.1 },
-  ],
-};
-
-type RouteContext = {
-  params: Promise<Record<string, never>>;
-};
-
-export async function GET(request: NextRequest, _context: RouteContext) {
+export async function GET(request: NextRequest) {
   const { config, user } = await requireAuthenticatedContext(request);
   const query = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   const responseHeaders = new Headers();
@@ -30,6 +15,7 @@ export async function GET(request: NextRequest, _context: RouteContext) {
     "cache-control",
     `private, max-age=0, stale-while-revalidate=${SEARCH_SERVER_TTL_SECONDS}`,
   );
+  applyCommonSecurityHeaders(responseHeaders);
 
   if (!query) {
     logAccess({
@@ -45,9 +31,7 @@ export async function GET(request: NextRequest, _context: RouteContext) {
   try {
     const documents = await listIndexableDocuments(config);
     const serialized = serializeIndexableDocuments(documents);
-    const fuse = new Fuse(serialized, fuseOptions);
-    const hits = fuse.search(query).slice(0, 30);
-    const results = hits.map((hit) => hit.item);
+    const results = searchDocuments(serialized, query, 30);
 
     logAccess({
       user,
