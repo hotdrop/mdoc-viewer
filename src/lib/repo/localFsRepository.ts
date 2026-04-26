@@ -71,6 +71,7 @@ export class LocalFsRepository implements DocumentRepository {
         updatedAt: node.stat.mtime,
         excerpt: parsed.excerpt,
         headings: parsed.headings,
+        bodyText: parsed.bodyText,
       });
     }
     return results;

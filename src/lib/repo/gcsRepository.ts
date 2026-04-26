@@ -98,6 +98,7 @@ export class GcsRepository implements DocumentRepository {
         updatedAt,
         excerpt: parsed.excerpt,
         headings: parsed.headings,
+        bodyText: parsed.bodyText,
       });
     }
     return results;

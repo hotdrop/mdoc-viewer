@@ -21,13 +21,19 @@ export type RecentDocument = {
   updatedAt: Date;
 };
 
+export type SearchHeading = {
+  title: string;
+  id: string;
+};
+
 export type IndexableDocument = {
   relativePath: string;
   viewerPath: string;
   title: string;
   updatedAt: Date;
   excerpt: string;
-  headings: string[];
+  headings: SearchHeading[];
+  bodyText: string;
 };
 
 export type DocumentTreeNode = {
