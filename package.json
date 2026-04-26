@@ -10,12 +10,12 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.13.0",
-    "firebase-admin": "^12.7.0",
+    "@google-cloud/storage": "^7.19.0",
+    "firebase-admin": "^13.8.0",
     "fuse.js": "^7.0.0",
     "gray-matter": "^4.0.3",
     "hast-util-from-html": "^2.0.1",
-    "next": "15.5.4",
+    "next": "15.5.15",
     "prismjs": "^1.29.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -40,11 +40,18 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.4",
+    "eslint-config-next": "15.5.15",
     "jsdom": "^26.0.0",
     "supertest": "^7.1.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^2.1.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "gray-matter>js-yaml": "3.14.2",
+      "mdast-util-to-hast": "13.2.1",
+      "next>postcss": "8.5.10"
+    }
   }
 }
