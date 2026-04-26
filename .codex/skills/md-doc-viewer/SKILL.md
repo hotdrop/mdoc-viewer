@@ -84,3 +84,13 @@ For affected behavior, verify:
 - CSP and `Vary: Authorization` are present
 - XSS fixtures are sanitized
 - search uses client mode below thresholds and server mode above thresholds
+
+## Post-Task Rule Feedback
+
+After implementation or development tasks, include a short rule-maintenance review in the final report:
+
+- Blocked by existing rules: list rules that made the task harder or impossible; write "なし" if none.
+- Rule improvement candidates: list rules that should be changed or added; write "なし" if none.
+- Classification: mark each candidate as task-specific or permanent.
+- Destination: task-specific candidates belong in this `SKILL.md`; permanent candidates belong in `AGENTS.md` or a file referenced from it.
+- Do not update rule files from this feedback unless the user explicitly approves the rule update.
