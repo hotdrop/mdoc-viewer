@@ -5,6 +5,7 @@ import { ForbiddenError, UnauthorizedError } from "@/lib/auth/errors";
 import { verifyBearerToken, type AuthenticatedUser } from "@/lib/auth/token";
 import { throwHttpError } from "@/lib/http";
 import { logAccess } from "@/lib/logger";
+import { AppHeader } from "./_components/AppHeader";
 import { AuthProvider } from "./_components/AuthProvider";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +49,10 @@ export default async function ProtectedLayout({
           bearerToken: authorizationHeader,
         }}
       >
-        <div className="flex min-h-screen flex-col">{children}</div>
+        <div className="flex min-h-screen flex-col">
+          <AppHeader />
+          {children}
+        </div>
       </AuthProvider>
     );
   } catch (error) {
