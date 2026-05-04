@@ -10,7 +10,7 @@ export function TableOfContents({ toc }: TableOfContentsProps) {
   }
 
   return (
-    <nav className="rounded-lg border border-slate-800 bg-slate-950/40 p-4 text-sm">
+    <nav className="max-h-[calc(100vh-3rem)] overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/40 p-4 text-sm">
       <h2 className="mb-3 font-semibold text-slate-200">目次</h2>
       <ul className="space-y-2">
         {toc.map((item) => (

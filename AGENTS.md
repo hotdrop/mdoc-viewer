@@ -75,6 +75,8 @@ sanitize/
 
 - 作業前に `docs/specification.md` と関連実装を確認する。
 - セキュリティ、Markdown、検索、Route Handler、リポジトリ層、テスト追加に関わる作業では `.codex/skills/md-doc-viewer/SKILL.md` を参照する。
+- エージェント・CI・完了検証ではウォッチ実行の `pnpm test` ではなく、非ウォッチの `pnpm exec vitest run` を使う。
+- localStorage などクライアント内永続化を追加する場合は、保存キー、保存範囲、最大件数、破損データ・利用不可時の挙動、テスト観点を実装前に明記する。
 - 変更は DRY, YAGNI, SOLID を意識しつつ、Next.js と TypeScript の既存慣習を優先する。
 - 既存のユーザー変更を巻き戻さない。
 

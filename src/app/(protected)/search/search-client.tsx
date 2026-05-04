@@ -13,6 +13,7 @@ import type {
   SearchResultItem,
 } from "@/types/search";
 import { formatDateTime } from "@/lib/datetime/format";
+import { buildViewerResultHref } from "@/lib/search/viewerLinks";
 
 type SearchClientProps = {
   payload: SearchPagePayload;
@@ -114,7 +115,7 @@ export default function SearchClient({ payload }: SearchClientProps) {
             className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
           >
             <a
-              href={result.targetHref}
+              href={buildViewerResultHref(result.targetHref, query)}
               className="block space-y-2 text-slate-100 hover:text-cyan-300"
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

@@ -71,9 +71,11 @@ Read `docs/specification.md` for detailed product behavior. Treat this skill as 
 
 Run the smallest relevant set first:
 
-- `pnpm test`
+- `pnpm exec vitest run`
 - `pnpm lint`
 - `pnpm build`
+
+Use `pnpm test` only when an interactive watch test loop is useful during local development.
 
 For affected behavior, verify:
 
@@ -84,6 +86,7 @@ For affected behavior, verify:
 - CSP and `Vary: Authorization` are present
 - XSS fixtures are sanitized
 - search uses client mode below thresholds and server mode above thresholds
+- UI changes identify the target screens, representative desktop/mobile viewports, and any required pre-state such as search query parameters or local history before manual verification.
 
 ## Post-Task Development Feedback
 
