@@ -11,6 +11,7 @@ import { TableOfContents } from "@/components/TableOfContents";
 import { getAdjacentDocuments } from "@/lib/viewer/navigation";
 import { DocumentNavigation } from "../_components/DocumentNavigation";
 import { MobileTableOfContents } from "../_components/MobileTableOfContents";
+import { TrackRecentlyViewedDocument } from "../_components/TrackRecentlyViewedDocument";
 import { ViewerDocumentActions } from "../_components/ViewerDocumentActions";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +47,11 @@ export default async function ViewerPage({ params, searchParams }: ViewerPagePro
 
     return (
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+        <TrackRecentlyViewedDocument
+          viewerPath={document.viewerPath}
+          title={title}
+        />
+
         <nav className="text-sm text-slate-400">
           <Link href="/" className="hover:text-cyan-300">
             ホーム

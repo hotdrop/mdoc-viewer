@@ -12,6 +12,7 @@ import {
 } from "@/lib/constants";
 import { MarkdownArticle } from "@/components/MarkdownArticle";
 import { formatDateTime } from "@/lib/datetime/format";
+import { RecentlyViewedDocuments } from "./_components/RecentlyViewedDocuments";
 import { DocumentNavigation } from "./viewer/_components/DocumentNavigation";
 
 export const dynamic = "force-dynamic";
@@ -26,60 +27,27 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <main className="px-8 py-10">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 lg:flex-row">
-        <aside className="lg:w-72 lg:flex-shrink-0">
+    <main className="px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <aside className="hidden lg:block lg:self-start">
           <DocumentNavigation
             tree={documentTree}
             currentPath=""
-            className="lg:sticky lg:top-10"
+            className="lg:sticky lg:top-8"
           />
         </aside>
-        <div className="flex flex-1 flex-col gap-12">
-          <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
-          <header className="mb-6">
-            <h1 className="text-2xl font-semibold">ロードマップ</h1>
-            <p className="text-sm text-slate-400">
-              進行中および今後の取り組みを確認できます。
-            </p>
-        </header>
-        {roadmap ? (
-          <div className="relative overflow-hidden rounded-lg border border-cyan-900/30 bg-slate-950/40">
-            <div className="absolute left-6 top-6 bottom-6 w-px bg-cyan-500/30" aria-hidden />
-            <div className="relative px-6 py-6 pl-12">
-              <MarkdownArticle
-                className="markdown-body max-w-none"
-                html={roadmap.rendered.html}
-              />
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm text-slate-400">
-            ロードマップドキュメントが見つかりませんでした。
-          </p>
-            )}
-          </section>
 
-          <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
-            <header className="mb-6">
-              <h1 className="text-2xl font-semibold">リリースノート</h1>
-              <p className="text-sm text-slate-400">
-                最新のお知らせを確認してください。
-              </p>
-            </header>
-            {releaseNotes ? (
-              <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-5">
-                <MarkdownArticle
-                  className="markdown-body max-w-none"
-                  html={releaseNotes.rendered.html}
-                />
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400">
-                リリースノートはまだ登録されていません。
-              </p>
-            )}
-          </section>
+        <div className="min-w-0 space-y-8">
+          <details className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 lg:hidden">
+            <summary className="cursor-pointer text-sm font-semibold text-slate-100">
+              ドキュメントツリー
+            </summary>
+            <DocumentNavigation
+              tree={documentTree}
+              currentPath=""
+              className="mt-4 border-0 bg-transparent p-0"
+            />
+          </details>
 
           <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
             <header className="mb-6 flex items-center justify-between gap-4">
@@ -116,6 +84,55 @@ export default async function DashboardPage() {
               )}
             </ul>
           </section>
+
+          <RecentlyViewedDocuments />
+
+          <div className="grid gap-8 xl:grid-cols-2">
+            <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
+              <header className="mb-6">
+                <h1 className="text-2xl font-semibold">ロードマップ</h1>
+                <p className="text-sm text-slate-400">
+                  進行中および今後の取り組みを確認できます。
+                </p>
+              </header>
+              {roadmap ? (
+                <div className="relative overflow-hidden rounded-lg border border-cyan-900/30 bg-slate-950/40">
+                  <div className="absolute bottom-6 left-6 top-6 w-px bg-cyan-500/30" aria-hidden />
+                  <div className="relative px-6 py-6 pl-12">
+                    <MarkdownArticle
+                      className="markdown-body max-w-none"
+                      html={roadmap.rendered.html}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  ロードマップドキュメントが見つかりませんでした。
+                </p>
+              )}
+            </section>
+
+            <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
+              <header className="mb-6">
+                <h1 className="text-2xl font-semibold">リリースノート</h1>
+                <p className="text-sm text-slate-400">
+                  最新のお知らせを確認してください。
+                </p>
+              </header>
+              {releaseNotes ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-5">
+                  <MarkdownArticle
+                    className="markdown-body max-w-none"
+                    html={releaseNotes.rendered.html}
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  リリースノートはまだ登録されていません。
+                </p>
+              )}
+            </section>
+          </div>
         </div>
       </div>
     </main>
