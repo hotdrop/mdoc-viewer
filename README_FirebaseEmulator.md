@@ -11,6 +11,13 @@ pnpm dev
 http://localhost:3000/local-login
 ```
 
+既にログイン済みの場合は、`/local-login` ではなく保護画面へ進めることがあります。
+
+起動後の代表的な確認対象:
+- `http://localhost:3000/`
+- `http://localhost:3000/viewer/...`
+- `http://localhost:3000/search`
+
 # テストユーザー
 mytest@myproduct.test.jp / sample1111
 

@@ -36,8 +36,8 @@ pnpm dev
 単体テストおよびスナップショットテストを実行します。
 
 ```bash
-# ユニットテスト
-pnpm test
+# ユニットテスト（非ウォッチ）
+pnpm exec vitest run
 
 # lint
 pnpm lint
@@ -45,6 +45,8 @@ pnpm lint
 # 型チェック
 pnpm exec tsc --noEmit
 ```
+
+開発中に継続実行したい場合のみ、ウォッチモードとして `pnpm test` を使用します。
 
 ## 画面イメージ
 ![トップページ](./images/01_top.png)
