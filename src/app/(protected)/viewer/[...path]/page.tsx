@@ -8,7 +8,10 @@ import {
 import { formatDateTime } from "@/lib/datetime/format";
 import { MarkdownArticle } from "@/components/MarkdownArticle";
 import { TableOfContents } from "@/components/TableOfContents";
+import { getAdjacentDocuments } from "@/lib/viewer/navigation";
 import { DocumentNavigation } from "../_components/DocumentNavigation";
+import { MobileTableOfContents } from "../_components/MobileTableOfContents";
+import { ViewerDocumentActions } from "../_components/ViewerDocumentActions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +21,15 @@ type ViewerPageParams = {
 
 type ViewerPageProps = {
   params: Promise<ViewerPageParams>;
+  searchParams: Promise<{
+    searchQuery?: string;
+  }>;
 };
 
-export default async function ViewerPage({ params }: ViewerPageProps) {
+export default async function ViewerPage({ params, searchParams }: ViewerPageProps) {
   const config = loadAppConfig();
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const pathSegments = resolvedParams?.path ?? [];
 
   try {
@@ -34,9 +41,11 @@ export default async function ViewerPage({ params }: ViewerPageProps) {
 
     const title = document.frontmatter.title ?? buildTitle(pathSegments);
     const breadcrumbs = buildBreadcrumbs(document.relativePath);
+    const adjacentDocuments = getAdjacentDocuments(documentTree, document.viewerPath);
+    const searchHref = buildSearchHref(resolvedSearchParams?.searchQuery);
 
     return (
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+      <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
         <nav className="text-sm text-slate-400">
           <Link href="/" className="hover:text-cyan-300">
             ホーム
@@ -61,22 +70,30 @@ export default async function ViewerPage({ params }: ViewerPageProps) {
           </p>
         </header>
 
-        <div className="flex flex-col gap-8 lg:flex-row">
-          <aside className="lg:w-64 lg:flex-shrink-0">
+        <ViewerDocumentActions
+          previous={adjacentDocuments.previous}
+          next={adjacentDocuments.next}
+          searchHref={searchHref}
+        />
+
+        <MobileTableOfContents toc={rendered.toc} />
+
+        <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)_17rem]">
+          <aside className="lg:sticky lg:top-6 lg:self-start">
             <DocumentNavigation
               tree={documentTree}
               currentPath={document.viewerPath}
             />
           </aside>
-          <section className="flex-1">
-            <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_260px]">
-              <MarkdownArticle
-                className="markdown-body"
-                html={rendered.html}
-              />
-              <TableOfContents toc={rendered.toc} />
-            </div>
+          <section className="min-w-0">
+            <MarkdownArticle
+              className="markdown-body"
+              html={rendered.html}
+            />
           </section>
+          <aside className="hidden xl:block xl:sticky xl:top-6 xl:self-start">
+            <TableOfContents toc={rendered.toc} />
+          </aside>
         </div>
       </main>
     );
@@ -110,6 +127,11 @@ function buildBreadcrumbs(relativePath: string) {
     });
   }
   return breadcrumbs;
+}
+
+function buildSearchHref(searchQuery?: string): string {
+  const query = searchQuery?.trim();
+  return query ? `/search?q=${encodeURIComponent(query)}` : "/search";
 }
 
 function isNotFoundError(error: unknown): boolean {
