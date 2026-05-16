@@ -73,8 +73,8 @@ export default async function ProtectedLayout({
         reason:
           error instanceof UnauthorizedError ? "auth_missing" : "auth_forbidden",
       });
-      if (config.runMode === "cloud" && error instanceof UnauthorizedError) {
-        redirect("/login");
+      if (error instanceof UnauthorizedError) {
+        redirect(config.runMode === "cloud" ? "/login" : "/local-login");
       }
       throwHttpError(error.status, error.message);
     }

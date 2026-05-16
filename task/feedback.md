@@ -57,3 +57,43 @@
 - AGENTS.md: 恒久対応するならCloud modeで開発用環境変数を拒否する方針とaudit分類基準を追記候補。
 - .codex/skills/md-doc-viewer/SKILL.md: sanitize変更時の`clobberPrefix`、見出しアンカー、TOC整合確認を追記候補。
 - docs/README/task/tests など: Cloud Runデプロイ前チェックに`pnpm audit --audit-level moderate`、production install、devDependency除外の確認を追記候補。
+
+# 2026/5/16 17:08 フィードバック
+
+## 作業内容
+- Firebase Auth Emulator起動済み環境で`pnpm dev`を起動し、アプリ内ブラウザーからローカルログイン、トップ、詳細、検索画面を確認した。
+
+## 開発改善フィードバック
+- 既存ルール・手順が障壁になった点: sandbox内の`pnpm dev`は`0.0.0.0:3000`のlistenで`EPERM`になり、権限付き実行が必要だった。
+- 改善した方がよいルール・手順: ローカルブラウザー確認手順に、`pnpm dev`がlisten権限で失敗した場合は許可付きで再実行することを補足するとよい。
+- 追加した方がよいルール・手順: 検索画面の確認では、サンプルデータに確実に含まれるクエリ例として`リリース`を使うと結果表示まで確認しやすい。
+- docs/README/タスクメモ/テストなどへ反映した方がよい点: `README_FirebaseEmulator.md`の代表確認対象に具体的な`/viewer/mobileapp`と検索語`リリース`を追記すると再現性が上がる。
+
+## 分類
+- タスク固有: ローカルログイン後の手動確認対象、検索確認クエリ、dev serverのlisten権限。
+- 恒久対応候補: ブラウザー確認時の起動失敗リカバリ、代表URLと検索語の明文化。
+
+## 更新先候補
+- AGENTS.md: 今回は恒久ルール化までは不要。
+- .codex/skills/md-doc-viewer/SKILL.md: 手動確認の代表URLと検索語を追記候補。
+- docs/README/task/tests など: `README_FirebaseEmulator.md`に具体的な確認URLと検索語を追記候補。
+
+# 2026/5/16 17:14 フィードバック
+
+## 作業内容
+- local modeの未認証アクセス時にRSC Layoutから`NextResponse`をthrowしてdev server上で500表示になる挙動を、`/local-login`へのredirectへ変更した。
+
+## 開発改善フィードバック
+- 既存ルール・手順が障壁になった点: Route HandlerとRSC/LayoutでHTTPエラーの返し方が異なり、共通`throwHttpError`をLayoutで使うとdev serverログ上は500扱いになる点が手順から読み取りにくかった。
+- 改善した方がよいルール・手順: Protected Layoutの未認証はレスポンスthrowではなくログイン画面redirectを基本にする、と認証実装チェックリストに明記するとよい。
+- 追加した方がよいルール・手順: 手動確認時は未認証で`/`にアクセスし、dev consoleで`GET / 500`が出ないことを確認観点に含めるとよい。
+- docs/README/タスクメモ/テストなどへ反映した方がよい点: ローカルログイン確認手順に、ログアウト後の`/`アクセスが`/local-login`へredirectされることを期待動作として追記するとよい。
+
+## 分類
+- タスク固有: local mode未認証時の`/local-login` redirect、dev serverログの500解消。
+- 恒久対応候補: RSC/LayoutでのHTTPエラー処理方針、未認証redirectの手動確認観点。
+
+## 更新先候補
+- AGENTS.md: 恒久ルール化するならProtected Layoutの未認証redirect方針を追記候補。
+- .codex/skills/md-doc-viewer/SKILL.md: 認証ガード確認に未認証`/`アクセス時のdev console確認を追記候補。
+- docs/README/task/tests など: `README_FirebaseEmulator.md`にログアウト後の未認証redirect期待値を追記候補。
