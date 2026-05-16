@@ -9,6 +9,7 @@ const tree: DocumentTreeNode[] = [
   {
     label: "ガイド",
     path: "guide",
+    href: "/viewer/guide",
     children: [
       {
         label: "はじめに",
@@ -33,8 +34,9 @@ const tree: DocumentTreeNode[] = [
 ];
 
 describe("flattenDocumentTree", () => {
-  it("ディレクトリを除外して表示順の文書リンクだけを返す", () => {
+  it("表示順の文書リンクを返し、代表文書を持つディレクトリも含める", () => {
     expect(flattenDocumentTree(tree)).toEqual([
+      { href: "/viewer/guide", label: "ガイド" },
       { href: "/viewer/guide/intro", label: "はじめに" },
       { href: "/viewer/guide/detail", label: "詳細" },
       { href: "/viewer/reference", label: "リファレンス" },
@@ -51,9 +53,9 @@ describe("getAdjacentDocuments", () => {
   });
 
   it("先頭文書では previous を返さない", () => {
-    expect(getAdjacentDocuments(tree, "/viewer/guide/intro")).toEqual({
+    expect(getAdjacentDocuments(tree, "/viewer/guide")).toEqual({
       previous: undefined,
-      next: { href: "/viewer/guide/detail", label: "詳細" },
+      next: { href: "/viewer/guide/intro", label: "はじめに" },
     });
   });
 

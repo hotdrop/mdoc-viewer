@@ -7,9 +7,9 @@ import type {
   RecentDocument,
 } from "@/types/document";
 import {
-  normalizeDocPath,
   resolveLocalFullPath,
   stripLeadingSlash,
+  toViewerPathFromRelativePath,
   type NormalizedDocPath,
 } from "../path";
 import type { DocumentRepository } from "./documentRepository";
@@ -78,8 +78,7 @@ export class LocalFsRepository implements DocumentRepository {
   }
 
   private toViewerPath(relativePath: string): string {
-    const docPath = normalizeDocPath(stripLeadingSlash(relativePath));
-    return docPath.viewerPath;
+    return toViewerPathFromRelativePath(stripLeadingSlash(relativePath));
   }
 
   private async listAllNodes(): Promise<

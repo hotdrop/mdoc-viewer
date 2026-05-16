@@ -4,7 +4,6 @@ import { renderMarkdown } from "@/lib/md/renderer";
 import { createDocumentRepository } from "@/lib/repo";
 import { normalizeDocPath, resolveRelativeDocPath } from "@/lib/path";
 import type {
-  DocumentContent,
   DocumentTreeNode,
   IndexableDocument,
   RecentDocument,
@@ -81,6 +80,7 @@ type MutableDirectoryNode = {
   readonly key: string;
   label: string;
   path: string;
+  href?: string;
   children: Map<string, MutableNode>;
 };
 
@@ -94,7 +94,9 @@ type MutableDocumentNode = {
 
 type MutableNode = MutableDirectoryNode | MutableDocumentNode;
 
-function buildDocumentTree(documents: IndexableDocument[]): DocumentTreeNode[] {
+export function buildDocumentTree(
+  documents: IndexableDocument[],
+): DocumentTreeNode[] {
   const root: MutableDirectoryNode = {
     type: "directory",
     key: "",
@@ -143,6 +145,15 @@ function insertDocumentNode(
   }
 
   const lastSegment = segments.at(-1) ?? "";
+  if (lastSegment === "index" && parent.path) {
+    parent.label =
+      doc.title ||
+      parent.label ||
+      formatSegmentLabel(parent.path.split("/").at(-1) ?? "");
+    parent.href = doc.viewerPath;
+    return;
+  }
+
   const documentKey = `doc:${withoutExtension}`;
   parent.children.set(documentKey, {
     type: "document",
@@ -176,6 +187,7 @@ function convertToTreeNodes(
     return {
       label: node.label,
       path: node.path,
+      href: node.href,
       children: convertToTreeNodes(node.children),
     };
   });

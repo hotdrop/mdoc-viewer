@@ -55,8 +55,7 @@ export function normalizeDocPath(raw?: string[] | string): NormalizedDocPath {
     .split("/")
     .filter(Boolean);
 
-  const viewerPath =
-    segments.length > 0 ? `/viewer/${segments.join("/")}` : "/viewer";
+  const viewerPath = toViewerPathFromRelativePath(relativePath);
 
   return {
     relativePath,
@@ -80,6 +79,20 @@ export function resolveRelativeDocPath(
 
 export function stripLeadingSlash(value: string): string {
   return value.replace(/^\/+/, "");
+}
+
+export function toViewerPathFromRelativePath(relativePath: string): string {
+  const normalizedRelativePath = stripLeadingSlash(
+    path.posix.normalize(relativePath),
+  );
+  const withoutExtension = normalizedRelativePath.replace(/\.txt$/i, "");
+  const segments = withoutExtension.split("/").filter(Boolean);
+
+  if (segments.length > 1 && segments.at(-1) === "index") {
+    segments.pop();
+  }
+
+  return segments.length > 0 ? `/viewer/${segments.join("/")}` : "/viewer";
 }
 
 export function resolveLocalFullPath(

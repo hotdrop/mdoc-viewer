@@ -95,6 +95,7 @@ Local/Cloud 両モードとも、テキストを文字列として返し後述�
 - 相対リンク変換: Markdown 内リンクおよび `/viewer/[...path]` の解決は以下の簡易ルールで処理する。
   - `path.normalize()`により正規化し、必ず`DOCS_ROOT`配下に収まることを検証。ルート外に出る場合は404。
   - ファイル拡張子は`.txt`固定。ディレクトリ指定時は`index.txt`を優先。
+  - 各ディレクトリ直下の`index.txt`は、そのディレクトリの入口文書として扱う。例: `mobileapp/index.txt` は `/viewer/mobileapp`、`mobileapp/setup.txt` は `/viewer/mobileapp/setup` に対応する。
   - 相対リンク(`./foo, ../bar`)はアプリ内ルーティング`/viewer/...`に変換。
 - 拡張仕様: Frontmatter(YAML形式)を先頭で検出した場合はタイトルなどのメタ情報として利用できる。
 
@@ -130,7 +131,7 @@ Local/Cloud 両モードとも、テキストを文字列として返し後述�
 | `/docs/[...path]`   | テキスト取得API(JSONレスポンス)     |
 | `/search`           | 検索結果一覧表示                 |
 
-`/viewer/foo/bar`は`foo/bar.txt`に対応し、`index.txt`を優先表示する。各ルートは認証済みセッション下でのみ利用可能。
+`/viewer/foo/bar`は`foo/bar.txt`に対応し、ディレクトリ指定時は`index.txt`を優先表示する。各ディレクトリの`index.txt`はフォルダ入口文書として扱い、`/viewer/mobileapp`は`mobileapp/index.txt`、`/viewer/mobileapp/setup`は`mobileapp/setup.txt`に対応する。各ルートは認証済みセッション下でのみ利用可能。
 
 ## 7. キャッシュ
 すべてのドキュメントとメディア取得APIは、`ETag`に基づく条件付き`GET`をサポートする。

@@ -9,3 +9,5 @@ Webアプリ起動時のファーストビューにおいて、トップ画面�
 - ローカルも Cloud Storageも`/`に配置したドキュメントを表示する。
 - ドキュメントを`release_note`や`schedules`と固定すると汎用性がなくなるので以下のようにしたい。
   - `index.txt`: release_noteやschedulesを書く
+
+→この案で決定。修正対応する
