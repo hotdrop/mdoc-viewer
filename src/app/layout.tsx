@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
+import { ThemeProvider } from "./_components/ThemeProvider";
 import "./globals.css";
 
 const notoSans = Noto_Sans_JP({
@@ -20,9 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" className={notoSans.variable}>
+    <html lang="ja" className={notoSans.variable} data-theme="dark">
       <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const navigationItems = [
   { href: "/", label: "トップ" },
   { href: "/search", label: "検索" },
+  { href: "/settings", label: "設定" },
 ];
 
 export function AppHeader() {
