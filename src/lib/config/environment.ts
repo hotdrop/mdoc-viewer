@@ -50,6 +50,11 @@ export function loadAppConfig(): AppConfig {
   }
 
   if (runMode === "cloud") {
+    if (firebaseAuthEmulatorHost) {
+      throw new Error(
+        "cloud モードでは FIREBASE_AUTH_EMULATOR_HOST を設定できません。",
+      );
+    }
     if (!gcpProjectId) {
       throw new Error("cloud モードでは GCP_PROJECT_ID が必要です。");
     }

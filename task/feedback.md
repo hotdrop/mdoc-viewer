@@ -37,3 +37,23 @@
 - AGENTS.md: 恒久対応するなら本番認証トークンをClient Componentへ渡さないルールを追記候補。
 - .codex/skills/md-doc-viewer/SKILL.md: Cloud Run認証レビュー時のsession cookie、`Vary: Cookie`、固定reasonコードの確認項目を追記候補。
 - docs/README/task/tests など: Cloud Runデプロイ手順とFirebase Auth設定チェックリスト、session cookie route testの観点を追記候補。
+
+# 2026/5/16 17:00 フィードバック
+
+## 作業内容
+- Cloud Run向けのセキュリティ指摘に対応し、Next.js更新、Cloud modeでのFirebase Auth Emulator拒否、Markdown見出しIDのclobber対策、依存関係監査の改善を実施した。
+
+## 開発改善フィードバック
+- 既存ルール・手順が障壁になった点: `pnpm audit` の指摘は実行時依存と開発時依存が混在し、どこまでをCloud Run配備ブロッカーにするか判断基準が明文化されていなかった。
+- 改善した方がよいルール・手順: Cloud Run向けレビューでは、`RUN_MODE=cloud`で開発用環境変数を拒否する設定テストをチェックリスト化するとよい。
+- 追加した方がよいルール・手順: sanitizeの`clobberPrefix`変更時は、生成HTMLの`id`、見出しアンカー、TOCの整合性を同時に確認するテスト観点を追加するとよい。
+- docs/README/タスクメモ/テストなどへ反映した方がよい点: 依存監査結果は`pnpm audit --audit-level moderate`を基準にし、lowのみ残る場合の扱いとCloud RunイメージでdevDependencyを含めない運用をデプロイ手順に補足するとよい。
+
+## 分類
+- タスク固有: Next.js 15.5.18更新、Firebase Auth Emulator誤設定拒否、Markdown clobber対策、Vite/protobuf系transitive override。
+- 恒久対応候補: Cloud modeでの開発用環境変数拒否、sanitize ID/TOC整合テスト、audit結果のruntime/dev分類基準。
+
+## 更新先候補
+- AGENTS.md: 恒久対応するならCloud modeで開発用環境変数を拒否する方針とaudit分類基準を追記候補。
+- .codex/skills/md-doc-viewer/SKILL.md: sanitize変更時の`clobberPrefix`、見出しアンカー、TOC整合確認を追記候補。
+- docs/README/task/tests など: Cloud Runデプロイ前チェックに`pnpm audit --audit-level moderate`、production install、devDependency除外の確認を追記候補。

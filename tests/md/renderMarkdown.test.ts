@@ -29,10 +29,26 @@ describe("renderMarkdown", () => {
     const result = await renderMarkdown(source, {
       currentRelativePath: "docs/index.txt",
     });
-    const expectedHtml = `<h1 id="title"><a href="#title" class="heading-anchor">Title</a></h1>
+    const expectedHtml = `<h1 id="md-title"><a href="#md-title" class="heading-anchor">Title</a></h1>
 <ul>
 <li>list item</li>
 </ul>`;
     expect(result.html).toBe(expectedHtml);
+  });
+
+  it("keeps sanitized heading ids aligned with anchors and toc", async () => {
+    const result = await renderMarkdown("## Location", {
+      currentRelativePath: "docs/index.txt",
+    });
+
+    expect(result.html).toContain('id="md-location"');
+    expect(result.html).toContain('href="#md-location"');
+    expect(result.toc).toEqual([
+      {
+        id: "md-location",
+        title: "Location",
+        depth: 2,
+      },
+    ]);
   });
 });
