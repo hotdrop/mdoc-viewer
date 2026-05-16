@@ -40,7 +40,7 @@ export default async function ViewerPage({ params, searchParams }: ViewerPagePro
     ]);
     const { document, rendered } = content;
 
-    const title = document.frontmatter.title ?? buildTitle(pathSegments);
+    const title = document.frontmatter.title ?? buildTitle(document.relativePath);
     const breadcrumbs = buildBreadcrumbs(document.relativePath);
     const adjacentDocuments = getAdjacentDocuments(documentTree, document.viewerPath);
     const searchHref = buildSearchHref(resolvedSearchParams?.searchQuery);
@@ -111,18 +111,17 @@ export default async function ViewerPage({ params, searchParams }: ViewerPagePro
   }
 }
 
-function buildTitle(pathSegments: string[]): string {
-  if (pathSegments.length === 0) {
+function buildTitle(relativePath: string): string {
+  const segments = toDisplaySegments(relativePath);
+  if (segments.length === 0) {
     return "ドキュメント";
   }
-  return pathSegments[pathSegments.length - 1]!
-    .replace(/\.txt$/i, "")
+  return segments[segments.length - 1]!
     .replace(/[-_]/g, " ");
 }
 
 function buildBreadcrumbs(relativePath: string) {
-  const withoutExtension = relativePath.replace(/\.txt$/i, "");
-  const segments = withoutExtension.split("/").filter(Boolean);
+  const segments = toDisplaySegments(relativePath);
   const breadcrumbs = [] as Array<{ href: string; label: string }>;
   const stack: string[] = [];
   for (const segment of segments) {
@@ -133,6 +132,15 @@ function buildBreadcrumbs(relativePath: string) {
     });
   }
   return breadcrumbs;
+}
+
+function toDisplaySegments(relativePath: string): string[] {
+  const withoutExtension = relativePath.replace(/\.txt$/i, "");
+  const segments = withoutExtension.split("/").filter(Boolean);
+  if (segments.length > 1 && segments.at(-1) === "index") {
+    return segments.slice(0, -1);
+  }
+  return segments;
 }
 
 function buildSearchHref(searchQuery?: string): string {

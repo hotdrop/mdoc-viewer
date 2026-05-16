@@ -2,13 +2,26 @@ import { describe, expect, it } from "vitest";
 import {
   normalizeDocPath,
   resolveRelativeDocPath,
+  toViewerPathFromRelativePath,
 } from "@/lib/path";
 
 describe("normalizeDocPath", () => {
+  it("uses index.txt for root path", () => {
+    const result = normalizeDocPath([]);
+    expect(result.relativePath).toBe("index.txt");
+    expect(result.viewerPath).toBe("/viewer/index");
+  });
+
   it("adds index.txt for directory path", () => {
     const result = normalizeDocPath(["guide"]);
     expect(result.relativePath).toBe("guide/index.txt");
-    expect(result.viewerPath).toBe("/viewer/guide/index");
+    expect(result.viewerPath).toBe("/viewer/guide");
+  });
+
+  it("normalizes explicit directory index files to the directory viewer path", () => {
+    const result = normalizeDocPath(["mobileapp", "index"]);
+    expect(result.relativePath).toBe("mobileapp/index.txt");
+    expect(result.viewerPath).toBe("/viewer/mobileapp");
   });
 
   it("rejects path traversal", () => {
@@ -20,6 +33,16 @@ describe("normalizeDocPath", () => {
   it("ensures .txt extension", () => {
     const result = normalizeDocPath("policies/security");
     expect(result.relativePath).toBe("policies/security.txt");
+    expect(result.viewerPath).toBe("/viewer/policies/security");
+  });
+
+  it("builds public viewer paths for index documents in document lists", () => {
+    expect(toViewerPathFromRelativePath("mobileapp/index.txt")).toBe(
+      "/viewer/mobileapp",
+    );
+    expect(toViewerPathFromRelativePath("mobileapp/setup.txt")).toBe(
+      "/viewer/mobileapp/setup",
+    );
   });
 });
 
