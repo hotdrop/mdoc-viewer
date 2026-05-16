@@ -3,6 +3,54 @@
 @layer base {
   :root {
     color-scheme: dark;
+    --color-slate-950: #0f172a;
+    --color-slate-900: #111827;
+    --color-slate-800: #1e293b;
+    --color-slate-700: #334155;
+    --color-slate-600: #475569;
+    --color-slate-500: #64748b;
+    --color-slate-400: #94a3b8;
+    --color-slate-300: #cbd5e1;
+    --color-slate-200: #e2e8f0;
+    --color-slate-100: #f1f5f9;
+    --color-cyan-900: #164e63;
+    --color-cyan-700: #0e7490;
+    --color-cyan-500: #06b6d4;
+    --color-cyan-400: #22d3ee;
+    --color-cyan-300: #67e8f9;
+    --color-cyan-200: #a5f3fc;
+    --color-emerald-950: #022c22;
+    --color-emerald-900: #064e3b;
+    --color-emerald-700: #047857;
+    --color-emerald-400: #34d399;
+    --color-emerald-200: #a7f3d0;
+    --color-rose-400: #fb7185;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --color-slate-950: #f8fafc;
+    --color-slate-900: #ffffff;
+    --color-slate-800: #cbd5e1;
+    --color-slate-700: #94a3b8;
+    --color-slate-600: #64748b;
+    --color-slate-500: #64748b;
+    --color-slate-400: #475569;
+    --color-slate-300: #334155;
+    --color-slate-200: #1e293b;
+    --color-slate-100: #0f172a;
+    --color-cyan-900: #a5f3fc;
+    --color-cyan-700: #0891b2;
+    --color-cyan-500: #0e7490;
+    --color-cyan-400: #0891b2;
+    --color-cyan-300: #0e7490;
+    --color-cyan-200: #155e75;
+    --color-emerald-950: #ecfdf5;
+    --color-emerald-900: #d1fae5;
+    --color-emerald-700: #047857;
+    --color-emerald-400: #059669;
+    --color-emerald-200: #065f46;
+    --color-rose-400: #be123c;
   }
 
   *, *::before, *::after {
@@ -12,8 +60,8 @@
   body {
     margin: 0;
     font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
-    background-color: #0f172a;
-    color: #e2e8f0;
+    background-color: var(--color-slate-950);
+    color: var(--color-slate-100);
   }
 }
 
@@ -38,21 +86,21 @@
 }
 
 .markdown-body code {
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: color-mix(in oklab, var(--color-slate-950) 70%, transparent);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-size: 0.9em;
 }
 
 .markdown-body pre {
-  background-color: rgba(15, 23, 42, 0.9);
+  background-color: color-mix(in oklab, var(--color-slate-950) 88%, var(--color-slate-900));
   padding: 1rem;
   border-radius: 8px;
   overflow-x: auto;
 }
 
 .markdown-body a {
-  color: #38bdf8;
+  color: var(--color-cyan-300);
   text-decoration: underline;
   text-decoration-thickness: 2px;
 }
@@ -71,12 +119,12 @@
 
 .markdown-body th,
 .markdown-body td {
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  border: 1px solid color-mix(in oklab, var(--color-slate-400) 45%, transparent);
   padding: 0.5rem 0.75rem;
 }
 
 .markdown-body tr:nth-child(2n) {
-  background-color: rgba(15, 23, 42, 0.4);
+  background-color: color-mix(in oklab, var(--color-slate-950) 42%, transparent);
 }
 
 .heading-anchor {
