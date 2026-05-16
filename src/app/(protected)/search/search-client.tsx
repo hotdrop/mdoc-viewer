@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../_components/AuthProvider";
 import {
   createSearchIndex,
   mapFuseResults,
@@ -20,7 +19,6 @@ type SearchClientProps = {
 };
 
 export default function SearchClient({ payload }: SearchClientProps) {
-  const auth = useAuth();
   const router = useRouter();
   const [query, setQuery] = useState(payload.initialQuery);
   const [results, setResults] = useState<SearchResultItem[]>([]);
@@ -54,7 +52,6 @@ export default function SearchClient({ payload }: SearchClientProps) {
         setIsLoading(true);
         try {
           const response = await fetch(`/search/api?q=${encodeURIComponent(query)}`, {
-            headers: auth.bearerToken ? { Authorization: auth.bearerToken } : undefined,
             cache: "no-store",
             signal: controller.signal,
           });
@@ -74,7 +71,7 @@ export default function SearchClient({ payload }: SearchClientProps) {
       void doFetch();
       return () => controller.abort();
     }
-  }, [auth.bearerToken, mode, query, searchIndex]);
+  }, [mode, query, searchIndex]);
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "../../_components/AuthProvider";
 import { postChatMessage } from "@/lib/chat/client";
 import type { ChatMessage } from "@/types/chat";
 import { ChatInputForm } from "./ChatInputForm";
@@ -11,7 +10,6 @@ const CHAT_ERROR_MESSAGE =
   "回答の取得に失敗しました。時間をおいて再度お試しください。";
 
 export default function ChatClient() {
-  const auth = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,7 +26,6 @@ export default function ChatClient() {
     try {
       const response = await postChatMessage({
         message,
-        bearerToken: auth.bearerToken,
       });
       const assistantMessage: ChatMessage = {
         id: createMessageId(),

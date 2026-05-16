@@ -44,10 +44,11 @@
   - `GcsRepository` が`Workload Identity`経由で`GCS`にアクセスし、`generation`と`etag`を利用してキャッシュ整合を取る。
 
 ## 5. 認証・セキュリティ設計
-認証は`Firebase Authentication`により行う。`Cloud Run`環境では`Authorization: Bearer`ヘッダで渡された`IDトークン`を `Firebase Admin SDK`で検証する。
+認証は`Firebase Authentication`により行う。`Cloud Run`環境ではブラウザが`/login`でGoogle認証を行い、取得した`IDトークン`を`/api/session`へ一度だけ送信する。サーバは`Firebase Admin SDK`で`IDトークン`を検証し、許可条件を満たす場合のみ`HttpOnly`/`Secure`/`SameSite=Lax`のセッションCookieを発行する。保護ページとRoute HandlerはこのセッションCookieを検証する。
   - `email_verified == true`かつ`email.endsWith("@xxxx.co.jp")`を満たすユーザーのみ許可
   - 未認証は`401`を返す。
   - 外部ドメインは`403`を返す。
+  - APIクライアント向けの`Authorization: Bearer`検証は内部・開発用途に限定し、本番ブラウザUIには`IDトークン`や`Bearer`値を露出しない。
 
 Localモードでは `Firebase Emulator` を使用し、同一コードパスで検証動作を再現する。
 `GCS`へのアクセスは`Cloud Run`の`Workload Identity`経由で行い、鍵ファイルは不要。`GCS`のオブジェクトは`Cloud Run`経由で取得されるが、仮に`GCS`の`URL`を直接共有しても`IAM`設定により外部からはアクセスできない。
@@ -55,7 +56,7 @@ Localモードでは `Firebase Emulator` を使用し、同一コードパスで
 ### 5.1 HTTP ヘッダ
 - `Last-Modified`を`ETag`と併用する(条件付きGETは `If-None-Match` 優先)
 - HTTP仕様的には文字列で返す必要があるので`ETag`は`ETag: "1707727200000"`(mtimeのミリ秒文字列)のように引用符付きで返す。
-- `Content-Security-Policy: script-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'` を適用。
+- `Content-Security-Policy` は `default-src 'self'; script-src 'self'; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; form-action 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; object-src 'none'` を基本として適用。
 
 ### 5.2 認証ガード範囲
 認証トークンの検証は`Next.js`の`Route Handler`層で実施し、全ページは`SSR/RSC`レベルで`Layout`ガードを行う。
@@ -73,6 +74,7 @@ Localモードでは `Firebase Emulator` を使用し、同一コードパスで
 - Firebase関連
  - FIREBASE_PROJECT_ID(識別子)
  - FIREBASE_WEB_API_KEY(公開前提／フロント埋め込みOK)
+ - FIREBASE_AUTH_DOMAIN(省略時は `{FIREBASE_PROJECT_ID}.firebaseapp.com`)
  - FIREBASE_AUTH_EMULATOR_HOST(Local時のみ／接続先)
 - ドメイン制限
  - ALLOWED_DOMAIN(例: example.co.jp)

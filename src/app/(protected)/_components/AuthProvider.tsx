@@ -7,7 +7,6 @@ import type { RunMode } from "@/lib/config";
 export type AuthContextValue = {
   user: AuthenticatedUser;
   runMode: RunMode;
-  bearerToken: string;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);

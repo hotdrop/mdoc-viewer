@@ -57,10 +57,14 @@ describe("POST /api/chat", () => {
     const response = await POST(createJsonRequest({ message: "ヘッダ確認" }));
 
     expect(response.headers.get("content-security-policy")).toContain("script-src 'self'");
+    expect(response.headers.get("content-security-policy")).toContain("default-src 'self'");
+    expect(response.headers.get("content-security-policy")).toContain("connect-src 'self'");
+    expect(response.headers.get("content-security-policy")).toContain("form-action 'self'");
+    expect(response.headers.get("content-security-policy")).toContain("img-src 'self' data:");
     expect(response.headers.get("content-security-policy")).toContain("base-uri 'none'");
     expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
     expect(response.headers.get("content-security-policy")).toContain("object-src 'none'");
-    expect(response.headers.get("vary")).toBe("Authorization");
+    expect(response.headers.get("vary")).toBe("Cookie, Authorization");
   });
 });
 

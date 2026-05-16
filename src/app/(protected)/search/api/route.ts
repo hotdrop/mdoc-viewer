@@ -42,14 +42,14 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ results }, { headers: responseHeaders });
-  } catch (error) {
+  } catch {
     logAccess({
       user,
       path: request.nextUrl.pathname,
       status: 500,
       mode: config.runMode,
       route: "/search/api",
-      reason: error instanceof Error ? error.message : "unknown_error",
+      reason: "repository_error",
     });
     return NextResponse.json(
       { message: "検索処理でエラーが発生しました。" },

@@ -50,6 +50,11 @@ describe("ChatClient", () => {
       expect(screen.getByText("ダミー回答です。")).toBeTruthy();
     });
 
+    const fetchMock = fetch as ReturnType<typeof vi.fn>;
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toEqual({
+      "content-type": "application/json",
+    });
+
     const referenceLink = screen.getByRole("link", { name: /サンプル仕様書/ });
     expect(referenceLink.getAttribute("href")).toBe("/viewer/sample");
   });
@@ -125,10 +130,9 @@ function renderChatClient() {
         user: {
           uid: "test-user",
           email: "user@example.co.jp",
-          emailVerified: true,
+          tokenIssuedAt: 0,
         },
         runMode: "local",
-        bearerToken: "Bearer test-token",
       }}
     >
       <ChatClient />

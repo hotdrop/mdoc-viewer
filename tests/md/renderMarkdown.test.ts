@@ -10,6 +10,13 @@ describe("renderMarkdown", () => {
     expect(html).not.toContain("javascript:");
   });
 
+  it("strips unsupported link protocols", async () => {
+    const { html } = await renderMarkdown("[ftp](ftp://example.com/file)", {
+      currentRelativePath: "docs/index.txt",
+    });
+    expect(html).not.toContain("ftp://");
+  });
+
   it("strips img tags", async () => {
     const { html } = await renderMarkdown("![](https://example.com/img.png)", {
       currentRelativePath: "docs/index.txt",

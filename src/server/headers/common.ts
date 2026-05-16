@@ -12,7 +12,13 @@ export function buildContentSecurityPolicy(options: BuildCspOptions = {}): strin
   if (options.nonce) {
     scriptSources.push(`'nonce-${options.nonce}'`);
   }
+  directives.push("default-src 'self'");
   directives.push(`script-src ${scriptSources.join(" ")}`);
+  directives.push(
+    "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com",
+  );
+  directives.push("form-action 'self'");
+  directives.push("img-src 'self' data:");
   directives.push("base-uri 'none'");
   directives.push("frame-ancestors 'none'");
   directives.push("object-src 'none'");
@@ -31,8 +37,10 @@ export function applyCommonSecurityHeaders(
     ?.split(",")
     .map((v) => v.trim())
     .filter(Boolean) ?? [];
-  if (!varyCurrent.includes("Authorization")) {
-    varyCurrent.push("Authorization");
+  for (const value of ["Cookie", "Authorization"]) {
+    if (!varyCurrent.includes(value)) {
+      varyCurrent.push(value);
+    }
   }
   headers.set("vary", varyCurrent.join(", "));
 }

@@ -11,6 +11,15 @@ type AccessLogParams = {
   reason?: string;
 };
 
+const SAFE_REASONS = new Set([
+  "auth_missing",
+  "auth_forbidden",
+  "document_not_found",
+  "empty_message",
+  "repository_error",
+  "unknown_error",
+]);
+
 export function logAccess({
   user,
   path,
@@ -25,6 +34,16 @@ export function logAccess({
     status,
     mode,
     route,
-    reason,
+    reason: sanitizeReason(reason),
   });
+}
+
+function sanitizeReason(reason?: string): string | undefined {
+  if (!reason) {
+    return undefined;
+  }
+  if (SAFE_REASONS.has(reason)) {
+    return reason;
+  }
+  return "unknown_error";
 }

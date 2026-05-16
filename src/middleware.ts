@@ -43,6 +43,7 @@ export function middleware(request: NextRequest) {
     "content-security-policy",
     buildContentSecurityPolicy({ nonce, allowUnsafeEval }),
   );
+  appendVary(response.headers, "Cookie");
   appendVary(response.headers, "Authorization");
   return response;
 }

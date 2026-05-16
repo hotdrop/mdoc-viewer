@@ -15,6 +15,7 @@ pnpm install
 | `ALLOWED_DOMAIN` | 許可ドメイン (`example.co.jp` 等) |
 | `FIREBASE_PROJECT_ID` | Firebase プロジェクト ID |
 | `FIREBASE_WEB_API_KEY` | クライアント用 API キー |
+| `FIREBASE_AUTH_DOMAIN` | Cloud ログイン用 Auth domain。未設定時は `{FIREBASE_PROJECT_ID}.firebaseapp.com` |
 | `FIREBASE_AUTH_EMULATOR_HOST` | Local モード時の認証エミュレータ (`localhost:9099` 等) |
 | `LOCAL_DOCS_ROOT` | Local モードのドキュメントディレクトリ |
 | `GCP_PROJECT_ID`, `GCS_BUCKET` | Cloud モードで使用 |
