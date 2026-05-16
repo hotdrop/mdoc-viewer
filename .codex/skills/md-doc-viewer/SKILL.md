@@ -86,6 +86,7 @@ For affected behavior, verify:
 - CSP and `Vary: Authorization` are present
 - XSS fixtures are sanitized
 - search uses client mode below thresholds and server mode above thresholds
+- routing, tree, search-link, or recent-list changes cover root `index.txt`, directory entry `foo/index.txt`, regular `foo/bar.txt`, `/viewer/foo` versus `/viewer/foo/index` normalization, and display/link consistency.
 - UI changes identify the target screens, representative desktop/mobile viewports, and any required pre-state such as search query parameters or local history before manual verification.
 
 ## Post-Task Development Feedback
