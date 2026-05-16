@@ -98,11 +98,12 @@ Local/Cloud 両モードとも、テキストを文字列として返し後述�
   - 相対リンク(`./foo, ../bar`)はアプリ内ルーティング`/viewer/...`に変換。
 - 拡張仕様: Frontmatter(YAML形式)を先頭で検出した場合はタイトルなどのメタ情報として利用できる。
 
-### 6.3 トップ画面(リリースノート+更新一覧)
+### 6.3 トップ画面(トップドキュメント+更新一覧)
 トップ画面は社員が更新内容を俯瞰できるポータルである。
-1. リリースノート表示
-   1. 固定パス(例: `release-notes.txt`)の`Markdown`ファイルを取得し、`MarkdownRenderer`で整形表示。
-   2. キャッシュ制御は通常文書と同一(`ETag`/60秒TTL)。
+1. トップドキュメント表示
+   1. ドキュメントルート直下の固定パス `index.txt` を取得し、`MarkdownRenderer`で整形表示。
+   2. Localモードでは `LOCAL_DOCS_ROOT/index.txt`、Cloudモードでは `GCS_BUCKET` 直下の `index.txt` を参照する。
+   3. キャッシュ制御は通常文書と同一(`ETag`/60秒TTL)。
 2. 更新ドキュメント一覧
    1. `DocumentRepository.listRecentDocuments(limit=20)` により更新日時降順で取得。
    2. Localモードでは`mtime`, Cloudモードでは`GCS`の`updated`メタデータを参照。
@@ -124,7 +125,7 @@ Local/Cloud 両モードとも、テキストを文字列として返し後述�
 
 | パス                  | 内容                       |
 | ------------------- | ------------------------ |
-| `/`                 | トップ画面(リリースノート＋更新一覧)      |
+| `/`                 | トップ画面(`index.txt`＋更新一覧)      |
 | `/viewer/[...path]` | ドキュメント詳細(Markdown整形済み表示) |
 | `/docs/[...path]`   | テキスト取得API(JSONレスポンス)     |
 | `/search`           | 検索結果一覧表示                 |

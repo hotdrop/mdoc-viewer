@@ -5,6 +5,12 @@ import {
 } from "@/lib/path";
 
 describe("normalizeDocPath", () => {
+  it("uses index.txt for root path", () => {
+    const result = normalizeDocPath([]);
+    expect(result.relativePath).toBe("index.txt");
+    expect(result.viewerPath).toBe("/viewer/index");
+  });
+
   it("adds index.txt for directory path", () => {
     const result = normalizeDocPath(["guide"]);
     expect(result.relativePath).toBe("guide/index.txt");

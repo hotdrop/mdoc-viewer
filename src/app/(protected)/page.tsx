@@ -5,11 +5,7 @@ import {
   listDocumentTree,
   listRecentDocuments,
 } from "@/lib/documents/service";
-import {
-  RECENT_DOCUMENT_LIMIT,
-  RELEASE_NOTES_PATH,
-  SCHEDULE_ROADMAP_PATH,
-} from "@/lib/constants";
+import { RECENT_DOCUMENT_LIMIT, TOP_DOCUMENT_PATH } from "@/lib/constants";
 import { MarkdownArticle } from "@/components/MarkdownArticle";
 import { formatDateTime } from "@/lib/datetime/format";
 import { RecentlyViewedDocuments } from "./_components/RecentlyViewedDocuments";
@@ -19,9 +15,8 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const config = loadAppConfig();
-  const [roadmap, releaseNotes, recentDocuments, documentTree] = await Promise.all([
-    loadScheduleRoadmap(config),
-    loadReleaseNotes(config),
+  const [topDocument, recentDocuments, documentTree] = await Promise.all([
+    loadTopDocument(config),
     listRecentDocuments(config, RECENT_DOCUMENT_LIMIT),
     listDocumentTree(config),
   ]);
@@ -38,6 +33,29 @@ export default async function DashboardPage() {
         </aside>
 
         <div className="min-w-0 space-y-8">
+          <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
+            <header className="mb-6">
+              <h1 className="text-2xl font-semibold">
+                {topDocument?.document.frontmatter.title ?? "トップドキュメント"}
+              </h1>
+              <p className="text-sm text-slate-400">
+                ドキュメントルートの index.txt を表示します。
+              </p>
+            </header>
+            {topDocument ? (
+              <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-5">
+                <MarkdownArticle
+                  className="markdown-body max-w-none"
+                  html={topDocument.rendered.html}
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">
+                トップドキュメントはまだ登録されていません。
+              </p>
+            )}
+          </section>
+
           <details className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 lg:hidden">
             <summary className="cursor-pointer text-sm font-semibold text-slate-100">
               ドキュメントツリー
@@ -86,70 +104,15 @@ export default async function DashboardPage() {
           </section>
 
           <RecentlyViewedDocuments />
-
-          <div className="grid gap-8 xl:grid-cols-2">
-            <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
-              <header className="mb-6">
-                <h1 className="text-2xl font-semibold">ロードマップ</h1>
-                <p className="text-sm text-slate-400">
-                  進行中および今後の取り組みを確認できます。
-                </p>
-              </header>
-              {roadmap ? (
-                <div className="relative overflow-hidden rounded-lg border border-cyan-900/30 bg-slate-950/40">
-                  <div className="absolute bottom-6 left-6 top-6 w-px bg-cyan-500/30" aria-hidden />
-                  <div className="relative px-6 py-6 pl-12">
-                    <MarkdownArticle
-                      className="markdown-body max-w-none"
-                      html={roadmap.rendered.html}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">
-                  ロードマップドキュメントが見つかりませんでした。
-                </p>
-              )}
-            </section>
-
-            <section className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
-              <header className="mb-6">
-                <h1 className="text-2xl font-semibold">リリースノート</h1>
-                <p className="text-sm text-slate-400">
-                  最新のお知らせを確認してください。
-                </p>
-              </header>
-              {releaseNotes ? (
-                <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-5">
-                  <MarkdownArticle
-                    className="markdown-body max-w-none"
-                    html={releaseNotes.rendered.html}
-                  />
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">
-                  リリースノートはまだ登録されていません。
-                </p>
-              )}
-            </section>
-          </div>
         </div>
       </div>
     </main>
   );
 }
 
-async function loadReleaseNotes(config: AppConfig) {
+async function loadTopDocument(config: AppConfig) {
   try {
-    return await fetchDocumentByRelativePath(config, RELEASE_NOTES_PATH);
-  } catch {
-    return null;
-  }
-}
-
-async function loadScheduleRoadmap(config: AppConfig) {
-  try {
-    return await fetchDocumentByRelativePath(config, SCHEDULE_ROADMAP_PATH);
+    return await fetchDocumentByRelativePath(config, TOP_DOCUMENT_PATH);
   } catch {
     return null;
   }
