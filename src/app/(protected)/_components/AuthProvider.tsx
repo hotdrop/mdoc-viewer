@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import type { AuthenticatedUser } from "@/lib/auth/token";
 import type { RunMode } from "@/lib/config";
 
