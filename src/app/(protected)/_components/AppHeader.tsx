@@ -44,6 +44,12 @@ export function AppHeader() {
               </Link>
             );
           })}
+          <a
+            href="/logout"
+            className="rounded-md px-3 py-2 text-sm font-medium text-slate-300 transition hover:text-cyan-200"
+          >
+            ログアウト
+          </a>
         </nav>
       </div>
     </header>

@@ -41,14 +41,14 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(chatResponse, { headers: responseHeaders });
-  } catch (error) {
+  } catch {
     logAccess({
       user,
       path: request.nextUrl.pathname,
       status: 500,
       mode: config.runMode,
       route: "/api/chat",
-      reason: error instanceof Error ? error.message : "unknown_error",
+      reason: "unknown_error",
     });
     return NextResponse.json(
       { message: "回答を取得できませんでした。" },

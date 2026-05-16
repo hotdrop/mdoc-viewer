@@ -1,8 +1,14 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { loadAppConfig } from "@/lib/config";
 import { ForbiddenError, UnauthorizedError } from "@/lib/auth/errors";
-import { verifyBearerToken, type AuthenticatedUser } from "@/lib/auth/token";
+import {
+  SESSION_COOKIE_NAME,
+  verifyBearerToken,
+  verifySessionCookie,
+  type AuthenticatedUser,
+} from "@/lib/auth/token";
 import { throwHttpError } from "@/lib/http";
 import { logAccess } from "@/lib/logger";
 import { AppHeader } from "./_components/AppHeader";
@@ -16,16 +22,18 @@ export default async function ProtectedLayout({
   children: ReactNode;
 }) {
   const requestHeaders = await headers();
+  const cookieStore = await cookies();
   const config = loadAppConfig();
   const authorizationHeader = requestHeaders.get("authorization") ?? "";
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
 
   let authenticatedUser: AuthenticatedUser | null = null;
 
   try {
-    authenticatedUser = await verifyBearerToken(
-      config,
-      authorizationHeader,
-    );
+    authenticatedUser =
+      config.runMode === "cloud"
+        ? await verifySessionCookie(config, sessionCookie)
+        : await verifyBearerToken(config, authorizationHeader);
 
     const path =
       requestHeaders.get("x-invoke-path") ??
@@ -46,7 +54,6 @@ export default async function ProtectedLayout({
         value={{
           user: authenticatedUser,
           runMode: config.runMode,
-          bearerToken: authorizationHeader,
         }}
       >
         <div className="flex min-h-screen flex-col">
@@ -63,8 +70,12 @@ export default async function ProtectedLayout({
         status: error.status,
         mode: config.runMode,
         route: "(protected)/layout",
-        reason: error.message,
+        reason:
+          error instanceof UnauthorizedError ? "auth_missing" : "auth_forbidden",
       });
+      if (error instanceof UnauthorizedError) {
+        redirect(config.runMode === "cloud" ? "/login" : "/local-login");
+      }
       throwHttpError(error.status, error.message);
     }
     logAccess({
@@ -73,7 +84,7 @@ export default async function ProtectedLayout({
       status: 500,
       mode: config.runMode,
       route: "(protected)/layout",
-      reason: error instanceof Error ? error.message : "unknown_error",
+      reason: "unknown_error",
     });
     throw error;
   }

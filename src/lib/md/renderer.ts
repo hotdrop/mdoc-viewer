@@ -55,10 +55,11 @@ export async function renderMarkdown(markdown: string, options: RenderOptions): 
     .use(remarkGfm)
     .use(remarkRehype, remarkRehypeOptions)
     .use(rehypeSlug)
-    .use(withHeadingAnchors, toc)
+    .use(withHeadingAnchors)
     .use(withRelativeLinks, options.currentRelativePath)
     .use(withPrismHighlight)
     .use(rehypeSanitize, sanitizePolicy)
+    .use(withNormalizedHeadingAnchors, toc)
     .use(rehypeStringify, { allowDangerousHtml: false });
 
   const file = await processor.process(markdown);
@@ -72,7 +73,7 @@ const remarkRehypeOptions: RemarkRehypeOptions = {
   allowDangerousHtml: false,
 };
 
-function withHeadingAnchors(toc: TocItem[]) {
+function withHeadingAnchors() {
   return (tree: Root) => {
     visitElements(tree, (node) => {
       if (!isHeading(node.tagName)) {
@@ -86,8 +87,6 @@ function withHeadingAnchors(toc: TocItem[]) {
       if (!textContent) {
         return;
       }
-      const depth = parseInt(node.tagName.slice(1), 10);
-      toc.push({ id, title: textContent, depth });
 
       node.children = [
         {
@@ -100,6 +99,42 @@ function withHeadingAnchors(toc: TocItem[]) {
           children: node.children,
         },
       ];
+    });
+  };
+}
+
+function withNormalizedHeadingAnchors(toc: TocItem[]) {
+  return (tree: Root) => {
+    toc.length = 0;
+    visitElements(tree, (node) => {
+      if (!isHeading(node.tagName)) {
+        return;
+      }
+      if (typeof node.properties?.id !== "string") {
+        return;
+      }
+
+      const id = node.properties.id;
+      const textContent = extractText(node).trim();
+      if (!textContent) {
+        return;
+      }
+
+      const firstChild = node.children[0];
+      if (
+        firstChild &&
+        isElementNode(firstChild) &&
+        firstChild.tagName === "a" &&
+        getClassName(firstChild).includes("heading-anchor")
+      ) {
+        firstChild.properties = {
+          ...(firstChild.properties ?? {}),
+          href: `#${id}`,
+        };
+      }
+
+      const depth = parseInt(node.tagName.slice(1), 10);
+      toc.push({ id, title: textContent, depth });
     });
   };
 }

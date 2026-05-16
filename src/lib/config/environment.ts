@@ -7,6 +7,7 @@ export type AppConfig = {
   allowedDomain: string;
   firebaseProjectId: string;
   firebaseWebApiKey: string;
+  firebaseAuthDomain: string;
   firebaseAuthEmulatorHost?: string;
   gcpProjectId?: string;
   gcsBucket?: string;
@@ -27,6 +28,10 @@ export function loadAppConfig(): AppConfig {
   const allowedDomain = (process.env.ALLOWED_DOMAIN ?? "").trim();
   const firebaseProjectId = (process.env.FIREBASE_PROJECT_ID ?? "").trim();
   const firebaseWebApiKey = (process.env.FIREBASE_WEB_API_KEY ?? "").trim();
+  const firebaseAuthDomain = (
+    process.env.FIREBASE_AUTH_DOMAIN ??
+    (firebaseProjectId ? `${firebaseProjectId}.firebaseapp.com` : "")
+  ).trim();
   const firebaseAuthEmulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
   const gcpProjectId = process.env.GCP_PROJECT_ID?.trim();
   const gcsBucket = process.env.GCS_BUCKET?.trim();
@@ -45,6 +50,11 @@ export function loadAppConfig(): AppConfig {
   }
 
   if (runMode === "cloud") {
+    if (firebaseAuthEmulatorHost) {
+      throw new Error(
+        "cloud モードでは FIREBASE_AUTH_EMULATOR_HOST を設定できません。",
+      );
+    }
     if (!gcpProjectId) {
       throw new Error("cloud モードでは GCP_PROJECT_ID が必要です。");
     }
@@ -62,6 +72,7 @@ export function loadAppConfig(): AppConfig {
     allowedDomain,
     firebaseProjectId,
     firebaseWebApiKey,
+    firebaseAuthDomain,
     firebaseAuthEmulatorHost,
     gcpProjectId,
     gcsBucket,

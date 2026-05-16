@@ -4,6 +4,7 @@ import { normalizeDocPath } from "@/lib/path";
 import { createDocumentRepository } from "@/lib/repo";
 import { applyCacheHeaders, shouldReturnNotModified } from "@/lib/cache/headers";
 import { logAccess } from "@/lib/logger";
+import { applyCommonSecurityHeaders } from "@/server/headers/common";
 
 type RouteContext = {
   params: Promise<{
@@ -18,6 +19,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   const repository = createDocumentRepository(config);
 
   const responseHeaders = new Headers();
+  applyCommonSecurityHeaders(responseHeaders);
   let status = 200;
 
   try {
@@ -75,13 +77,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
       status,
       mode: config.runMode,
       route: "/docs/[...path]",
-      reason: error instanceof Error ? error.message : "unknown_error",
+      reason: status === 404 ? "document_not_found" : "repository_error",
     });
 
     return NextResponse.json(
       { message: "ドキュメントを取得できませんでした。" },
       {
         status,
+        headers: responseHeaders,
       },
     );
   }

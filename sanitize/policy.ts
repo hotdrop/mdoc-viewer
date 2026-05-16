@@ -3,7 +3,7 @@ import { defaultSchema } from "rehype-sanitize";
 
 const POLICY: SanitizeOptions = {
   ...defaultSchema,
-  clobberPrefix: "",
+  clobberPrefix: "md-",
   tagNames: [
     "a",
     "abbr",
@@ -67,7 +67,7 @@ const POLICY: SanitizeOptions = {
     h6: ["id", "className"],
   },
   protocols: {
-    href: ["http", "https", "mailto", "tel", "sms", "ftp", "gopher", "irc", "ircs"],
+    href: ["http", "https", "mailto"],
   },
 };
 

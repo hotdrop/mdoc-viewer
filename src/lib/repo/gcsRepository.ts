@@ -24,7 +24,7 @@ export class GcsRepository implements DocumentRepository {
     const file = this.bucket.file(docPath.relativePath);
     const [exists] = await file.exists();
     if (!exists) {
-      throw new Error("ドキュメントが存在しません。");
+      throw Object.assign(new Error("document_not_found"), { code: "404" });
     }
 
     const [[content], [metadata]] = await Promise.all([

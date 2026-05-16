@@ -17,3 +17,83 @@
 - AGENTS.md: 恒久対応するなら Route Handler 追加時のヘッダテスト観点を追記候補。
 - .codex/skills/md-doc-viewer/SKILL.md: UI component の jsdom テスト時に `React` import を確認する手順を追記候補。
 - docs/README/task/tests など: Chat/RAG Core API 連携時の差し替え対象として `src/lib/chat/service.ts` を記録候補。
+
+# 2026/5/16 16:39 フィードバック
+
+## 作業内容
+- Cloud Run向けにFirebase Googleログイン、Firebase session cookie認証、ログアウト、CSP/sanitize/logging強化、関連テストと仕様更新を実施した。
+
+## 開発改善フィードバック
+- 既存ルール・手順が障壁になった点: Cloud Runのブラウザ認証では`Authorization: Bearer`前提とsession cookie前提で設計が大きく変わるため、仕様上の認証搬送方針に補足が必要だった。
+- 改善した方がよいルール・手順: Cloud modeの保護ページでは「Firebase ID tokenをクライアント状態として保持しない」ことを認証チェックリストに明記するとよい。
+- 追加した方がよいルール・手順: Route Handlerの`Vary`はcookie認証導入時に`Cookie`を含める、ログ`reason`は固定コードのみ許可する、という検証観点を追加するとよい。
+- docs/README/タスクメモ/テストなどへ反映した方がよい点: Cloud Runデプロイ手順に、未認証呼び出し許可、Firebase Google provider有効化、承認済みドメイン、`FIREBASE_AUTH_DOMAIN`の確認を追加するとよい。
+
+## 分類
+- タスク固有: Cloud RunでのFirebase Googleログイン導線、session cookie発行API、クライアントfetchからのBearer削除。
+- 恒久対応候補: 本番ブラウザUIへID token/Bearerを露出しないルール、ログreason固定コード化、cookie認証時の`Vary: Cookie`確認。
+
+## 更新先候補
+- AGENTS.md: 恒久対応するなら本番認証トークンをClient Componentへ渡さないルールを追記候補。
+- .codex/skills/md-doc-viewer/SKILL.md: Cloud Run認証レビュー時のsession cookie、`Vary: Cookie`、固定reasonコードの確認項目を追記候補。
+- docs/README/task/tests など: Cloud Runデプロイ手順とFirebase Auth設定チェックリスト、session cookie route testの観点を追記候補。
+
+# 2026/5/16 17:00 フィードバック
+
+## 作業内容
+- Cloud Run向けのセキュリティ指摘に対応し、Next.js更新、Cloud modeでのFirebase Auth Emulator拒否、Markdown見出しIDのclobber対策、依存関係監査の改善を実施した。
+
+## 開発改善フィードバック
+- 既存ルール・手順が障壁になった点: `pnpm audit` の指摘は実行時依存と開発時依存が混在し、どこまでをCloud Run配備ブロッカーにするか判断基準が明文化されていなかった。
+- 改善した方がよいルール・手順: Cloud Run向けレビューでは、`RUN_MODE=cloud`で開発用環境変数を拒否する設定テストをチェックリスト化するとよい。
+- 追加した方がよいルール・手順: sanitizeの`clobberPrefix`変更時は、生成HTMLの`id`、見出しアンカー、TOCの整合性を同時に確認するテスト観点を追加するとよい。
+- docs/README/タスクメモ/テストなどへ反映した方がよい点: 依存監査結果は`pnpm audit --audit-level moderate`を基準にし、lowのみ残る場合の扱いとCloud RunイメージでdevDependencyを含めない運用をデプロイ手順に補足するとよい。
+
+## 分類
+- タスク固有: Next.js 15.5.18更新、Firebase Auth Emulator誤設定拒否、Markdown clobber対策、Vite/protobuf系transitive override。
+- 恒久対応候補: Cloud modeでの開発用環境変数拒否、sanitize ID/TOC整合テスト、audit結果のruntime/dev分類基準。
+
+## 更新先候補
+- AGENTS.md: 恒久対応するならCloud modeで開発用環境変数を拒否する方針とaudit分類基準を追記候補。
+- .codex/skills/md-doc-viewer/SKILL.md: sanitize変更時の`clobberPrefix`、見出しアンカー、TOC整合確認を追記候補。
+- docs/README/task/tests など: Cloud Runデプロイ前チェックに`pnpm audit --audit-level moderate`、production install、devDependency除外の確認を追記候補。
+
+# 2026/5/16 17:08 フィードバック
+
+## 作業内容
+- Firebase Auth Emulator起動済み環境で`pnpm dev`を起動し、アプリ内ブラウザーからローカルログイン、トップ、詳細、検索画面を確認した。
+
+## 開発改善フィードバック
+- 既存ルール・手順が障壁になった点: sandbox内の`pnpm dev`は`0.0.0.0:3000`のlistenで`EPERM`になり、権限付き実行が必要だった。
+- 改善した方がよいルール・手順: ローカルブラウザー確認手順に、`pnpm dev`がlisten権限で失敗した場合は許可付きで再実行することを補足するとよい。
+- 追加した方がよいルール・手順: 検索画面の確認では、サンプルデータに確実に含まれるクエリ例として`リリース`を使うと結果表示まで確認しやすい。
+- docs/README/タスクメモ/テストなどへ反映した方がよい点: `README_FirebaseEmulator.md`の代表確認対象に具体的な`/viewer/mobileapp`と検索語`リリース`を追記すると再現性が上がる。
+
+## 分類
+- タスク固有: ローカルログイン後の手動確認対象、検索確認クエリ、dev serverのlisten権限。
+- 恒久対応候補: ブラウザー確認時の起動失敗リカバリ、代表URLと検索語の明文化。
+
+## 更新先候補
+- AGENTS.md: 今回は恒久ルール化までは不要。
+- .codex/skills/md-doc-viewer/SKILL.md: 手動確認の代表URLと検索語を追記候補。
+- docs/README/task/tests など: `README_FirebaseEmulator.md`に具体的な確認URLと検索語を追記候補。
+
+# 2026/5/16 17:14 フィードバック
+
+## 作業内容
+- local modeの未認証アクセス時にRSC Layoutから`NextResponse`をthrowしてdev server上で500表示になる挙動を、`/local-login`へのredirectへ変更した。
+
+## 開発改善フィードバック
+- 既存ルール・手順が障壁になった点: Route HandlerとRSC/LayoutでHTTPエラーの返し方が異なり、共通`throwHttpError`をLayoutで使うとdev serverログ上は500扱いになる点が手順から読み取りにくかった。
+- 改善した方がよいルール・手順: Protected Layoutの未認証はレスポンスthrowではなくログイン画面redirectを基本にする、と認証実装チェックリストに明記するとよい。
+- 追加した方がよいルール・手順: 手動確認時は未認証で`/`にアクセスし、dev consoleで`GET / 500`が出ないことを確認観点に含めるとよい。
+- docs/README/タスクメモ/テストなどへ反映した方がよい点: ローカルログイン確認手順に、ログアウト後の`/`アクセスが`/local-login`へredirectされることを期待動作として追記するとよい。
+
+## 分類
+- タスク固有: local mode未認証時の`/local-login` redirect、dev serverログの500解消。
+- 恒久対応候補: RSC/LayoutでのHTTPエラー処理方針、未認証redirectの手動確認観点。
+
+## 更新先候補
+- AGENTS.md: 恒久ルール化するならProtected Layoutの未認証redirect方針を追記候補。
+- .codex/skills/md-doc-viewer/SKILL.md: 認証ガード確認に未認証`/`アクセス時のdev console確認を追記候補。
+- docs/README/task/tests など: `README_FirebaseEmulator.md`にログアウト後の未認証redirect期待値を追記候補。
